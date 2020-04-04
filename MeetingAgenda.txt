@@ -1,0 +1,67 @@
+
+What EventLite site may look like (as much as it informs the EventCatalogApi Domain/Models)
+
+    Any edits apparent for Domain/Model classes?
+
+
+Step through microservices building outline/roadmap
+Identify which steps apply to assignment 3a (catalog microservice)
+Noting steps we pass by which we will probably do in later parts
+
+    Features the JewelsOnContainer ProductCatalogApi microservice provides (to the WebMVC)
+
+    What features does the EventCatalogApi need?
+        What will WebMVC need for the envisioned views?
+        What will the other (cart/order?) microservice need?
+(or wait and add this when we’ve covered cart/order/inter-microservice communication)
+
+Propose some APIs
+Interface contracts
+
+
+Now any other edits apparent for Domain/Model classes?
+
+
+
+
+Is anything missing from the high-level of the steps relevant for finishing 3a?
+
+
+How to break up the work into three pieces
+
+
+For each mini-assignment/Task:
+
+Step #1:
+    Write pseudocode for the steps your code will do (very casual English, short phrases) 
+    What data do you need? How will you access the data? What is the type of that/those object(s)?
+    What actions/steps must your code perform? What is the rationale for these actions? What would happen if these actions weren’t taken?
+    If you are writing a method that returns an object, describe the meaning of the object being returned.
+    Strive to get feedback from another teammate, a TA, or someone else before coding it
+
+Step #2:
+    Convert your pseudocode to code
+
+Step #3:
+    If what you’ve written/finished is an API method, use Postman to test
+
+
+
+
+
+Challenge for Assignment 3:
+Avoid writing code (or copypasta) that you don’t understand what it does
+Or, if you must, do it and then commit to figuring it out in the soon future (say, within a week)
+    Don’t miss the opportunity
+    ...unless it’s HTML, JS or CSS, then it’s ok to copy/paste without understanding it...in fact, I encourage it
+
+
+
+Formulate highest-impact questions for assignment 3a
+
+
+
+Identify which date for:
+Make sure you can build and run Kal’s code commit on X date (covers what we need for assn 3a)
+    How to make a branch from a specific commit
+Minimum IIS Express, Entity Framework

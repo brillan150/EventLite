@@ -1,0 +1,1156 @@
+Class #9 2-29-20
+
+1) Create models
+including "virtual" dependency properties (for Entity Framework, right?)
+these become the foreign keys for the database tables, right?
+
+CatalogBrand
+
+CatalogType
+
+CatalogItem
+    public virtual CatalogType  CatalogType  { get; set; }
+    public virtual CatalogBrand CatalogBrand { get; set; }
+                    ^ class type  ^ property name
+
+2) Install Entity Framework Core Nuget packages:
+Manage nuget packages into this ProductCatalogApi project
+// Install four packages:
+// Microsoft.EntityFrameworkCore (works with any data store)
+// Microsoft.EntityFrameworkCore.Relational (we will be using relational -sql- database)
+// Microsoft.EntityFrameworkCore.SqlServer
+// Microsoft.EntityFrameworkCore.Tools
+
+
+
+---
+
+Class #10 3-1-20
+
+Ahead of using docker, set up in sql express using vs (for testing and getting set up)
+Talk to local db before containerizing to docker container
+
+        // Write the were, what and how:
+
+        // For Entity Framework, we need to provide these three things:
+        //    a) where to create tables
+        //    b) what code should be converted to tables
+        //    c) how: when you create them as tables, how to configure them
+        //        some columns to be primary key
+        //        some columns to be required
+        //        some columns to be of a certain size
+        //    (rules about how table to be created)
+
+
+? Tables
+CatalogContext.cs in Data folder of project
+
+---
+WHERE
+*** Dependency Injection *** Is this "Where"? (Where to create the tables)
+
+Two layers:
+    While developing
+        Isolated
+    While deploying
+        Dependencies injected
+
+Two things to make DI work:
+    a) Classes that have dependencies (such as CatalogContext?)
+        Inherit from DbContext
+            public class CatalogContext : DbContext
+    Specify DbContextOptions (DI parameter) in class constructor:
+            public CatalogContext(DbContextOptions options) {}
+    b) The sending end (Startup.cs)
+        Before microservice starts up
+        Pass these to any constructor that wants it
+
+
+Note that settings values read in by Startup from a json config file
+(prevents needing to recompile and redeploy when something changes)
+
+---
+WHAT
+*** Create DbSet objects *** What (tables to go create)
+
+
+
+Make db table of type each domain class (where to do?)
+    public DbSet<CatalogBrand> CatalogBrands { get; set; }
+    public DbSet<CatalogType> CatalogTypes { get; set; }
+    public DbSet<CatalogItem> CatalogItems { get; set; }
+
+Since you named it CatalogBrand, default name will be CatalogBrands
+
+
+
+
+---
+HOW
+*** On CatalogContext : DbContext class, Override OnModelCreating() ***
+How to create/configure tables
+
+protected override void OnModelCreating(ModelBuilder modelBuilder)
+
+do not call the base DbContext OnModelCreating
+XX BAD NO: base.OnModelCreating(modelBuilder);
+
+
+Now provide methods for EF to call when setting up tables
+pass in set of methods inside a lambda statement
+
+For each table:
+modelBuilder.Entity<CatalogBrand> (e =>
+
+e is of type EntityTypeBuider<CatalogBrand>
+Note that Entity<CatalogBrand> is a method on the modelBuilder object
+rather than a LINQ query.
+That is, modelBuilder is a ModelBuilder object (not a collection of EntityTypeBuilder<CatalogBrand>)
+This signature of the overload we're using is:
+ModelBuilder.Entity<TEntity>(Action<EntityTypeBuilder<TEntity>>)
+Specifically, the method accepts as a parameter one Action<EntityTypeBuilder<TEntity>>
+which can be expressed as a lambda statement (or expression)
+
+Essentially, for the EntityTypeBuider<CatalogBrand>, what commands to execute to set up the table
+
+Set the name of the table (or accept the default of the class type pluralized)
+e.ToTable("CatalogBrands");
+
+Set the property of the class type to be the primary key of the table
+e.Property(b => b.Id)
+B is for brand
+Pass in "A lambda expression representing the property to be configured"
+Do not use the Property method that accepts a string parameter, that will break of the property name in the class changes.
+
+Chain the next call:
+    .IsRequired()
+Make this field required
+
+Chain one more call:
+    .UseHiLo("catalog_brand_hilo");
+Use HiLo technique
+db gives you back a range
+as a client you can pick any number in this range
+Name the constraint so that the constraint can be modified or deleted later
+
+
+
+Set the other property for the table (other, non-primary key)
+e.Property(b => b.Brand)
+    .IsRequired()
+    .HasMaxLength(100);
+For string fields, use appropriate Varchar (variable length) or char (fixed length)
+HasMaxLength is Varchar
+
+CatalogType table setup is similar:
+modelBuilder.Entity<CatalogType>(e =>
+                {
+                    e.ToTable("CatalogTypes");
+                    e.Property(t => t.Id)
+                        .IsRequired()
+                        .UseHiLo("catalog_type_hilo"); // Name the constraint
+                    e.Property(t => t.Type)
+                        .IsRequired()
+                        .HasMaxLength(100);
+                });
+
+
+For CatalogItem,
+            modelBuilder.Entity<CatalogItem>(e =>
+                {
+                    Note that you can name the db table differently than the the class type:
+                    e.ToTable("Catalog");
+                    'c' for catalog in the lambda statements
+                    e.Property(c => c.Id)
+                        .IsRequired()
+                        .UseHiLo("catalog_hilo");
+                    e.Property(c => c.Name)
+                        .IsRequired()
+                        .HasMaxLength(100);
+                    e.Property(c => c.Price)
+                        .IsRequired();
+
+Foreign key relationship
+                    // Three kinds of relationships in the db world:
+                    // 1:1
+                    // 1:M / M:1
+                    // M:M
+
+From the perspective of CatalogItem,
+each CatalogItem has one CatalogType
+                    e.HasOne(c => c.CatalogType)
+                    Declaration for CatalogType on the CatalogItem class:
+                            public virtual CatalogType CatalogType { get; set; }
+                                            ^ member type ^ member name
+                        .WithMany()
+                    Each CatalogType has many CatalogItem
+                        .HasForeignKey(c => c.CatalogTypeId);
+                    Each CatalogItem has a key (a foreign key) to the CatalogType table
+                    Declaration for CatalogTypeId on the CatalogItem class:
+                            public int CatalogTypeId { get; set; }
+
+Same for CatalogBrand:
+                    e.HasOne(c => c.CatalogBrand)
+                        .WithMany()
+                        .HasForeignKey(c => c.CatalogBrandId);
+DO Explicitly create foreign keys in your class types
+If you don't specify a foreign key, you'll get one (a useless one that you can't reference) automatically
+
+DONE configuring the Entity Framework (WHERE, WHAT AND HOW)
+
+
+---
+DI (Dependency Injection)
+
+>>>
+Now go to Startup.cs to set up DI
+https://youtu.be/1k11n8FO_UU?list=PLdbymrfiqF-wmh3VsbxysBsu2O9w6Z3Ks&t=3232
+
+Note constructor for Startup class:
+
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+Go to appsettings.json to set up the objects to be represented by Configuration
+(Everything in this step is for using LocalDb, will not be used once set up with Docker.)
+
+>>>
+// In VS:
+// View > SQL Server Object Explorer
+// Right click on MSSQLLocalDB, Properties
+
+Copy ConnectionString:
+// Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=master;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False
+
+These are key value pairs seperated by semicolons
+
+// Four pieces needed for Connection String:
+// Where:             Data Source=(localdb)\\MSSQLLocalDB
+// Name:              Initial Catalog=CatalogDb < ***IMPORTANT! NOT MASTER!***
+// What security:     Integrated Security=True
+// When to time out:  Connect Timeout=30
+
+Remember to set the Initial Catalog to a value other than master.
+Don't put your personal tables in the master db. That is for keeping track of all tables on your system.
+
+
+>>>
+Put at the very top of appsettings.json (outside of everything)
+
+"Connection String" in double quotes, a colon (:), then the connection string in double quotes, followed by a comma (,)
+
+??? QUESTION: IS A SEMICOLON AFTER THE FINAL ITEM IN THE CONNECTION STRING ALLOWED
+
+  "ConnectionString": "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=CatalogDb;Integrated Security=True;Connect Timeout=30;",
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Information"
+    }
+  },
+  "AllowedHosts": "*"
+
+Discard the others.
+
+
+>>>
+Back to Startup.cs
+
+Look at the Startup.ConfigureServices method:
+        public void ConfigureServices(IServiceCollection services)
+Configures your microservices.
+Adds services to the container.
+Called for you by the runtime.
+
+Leave this call, we'll come back to it:
+            services.AddControllers();
+
+Recall that CatalogContext derives from DbContext,
+    public class CatalogContext : DbContext
+Services need a DbContext, specifically a CatalogContext
+
+Startup will create a CatalogContext instance that will connect to your db
+
+
+*** Inject DbContext into your service ***
+
+ Recall the declaration of the constructor for the CatalogContext class:
+    {
+        // Dependency Injection
+        public CatalogContext(DbContextOptions options) : base(options) { }
+
+Register the CatalogContext (the DbContext) as a service in the IServicesCollection (services parameter on ConfigureServices)
+
+services.AddDbContext<CatalogContext>( ... )
+            // IServiceCollection.AddDbContext<CatalogContext>(Action<DbContextOptionsBuilder>)
+
+services.AddDbContext<CatalogContext>(
+    options =>
+    options.UseSqlServer(Configuration["ConnectionString"]));
+
+            //DbContextOptionsBuilder.
+            //          UseSqlServer(String)
+
+   options "Configures the context to connect to a Microsoft SQL Server database."
+   Lookup the ConnectionString that we defined in appsettings.json with the "ConnectionString" key.
+
+            // At this point,
+            // a) My services need a database           services.AddDbContext
+            // b) what kind of database?                <CatalogContext>
+            // c) Startup creates an instance of CatalogContext
+            // d) when it does so, it needs to pass     a DbContextOptionsBuilder  
+            // e) use sql server                        (options => options.UseSqlServer
+            // f) here is the connection string from the config that says where it is
+            //                                      (Configuration["ConnectionString"]));
+
+            // THEN:
+            // DbContextOptions injected into the constructor for CatalogContext
+            // which will in turn pass the options on to the base class (DbContext)
+            // which is when Entity Framework will create the database there for you.
+
+            // That is how you connect the object in memory to the actual SQL server
+
+            // Now whenever you refer to CatalogContext in code, it knows which actual
+            // physical db and table it needs to go to
+
+            // Now have:
+            // Models defined
+            // Entity Framework defined
+            // Now a matter of executing it and seeing it in action
+
+            // Next time: Still have powershell commands to run
+
+
+
+---
+
+Class #11 3-7-20
+
+High Level of today:
+
+- CatalogSeed.cs:
+    Write CatalogSeed class and Seed() method for seeding the db with sample data
+-- CatalogSeed.Seed():
+    Starting at tables with no dependencies, if no rows exist, add a range (collection) of preconfigured model/domain objects to the table on the DbContext. Save changes on the DbContext as needed before tables with dependencies on other tables.
+-- CatalogSeed.GetPreconfiguredCatalogItems():
+    Include placeholder host/domain path for wwwroot files: "http://externalcatalogbaseurltobereplaced/api/pic/1"
+--- File Explorer / Solution Explorer (ProductCatalogApi.wwwroot):
+    For all conent to be deployed with app (ex. jewels pics, shoes pics), create and drag files to wwwroot folder in ProductCatalogApi project.
+
+
+
+- Program.cs:
+    High level:
+    Kick of building the host, wait for the db context to be ready, seed the db, then run the host.
+-- Build() the host and save a handle to it; don't Run() it yet.
+-- In a using statement (for Dispose()), CreateScope() on the Services of the host and save a handle to it.
+-- Save a handle to the ServiceProvider of the scope.
+-- For the serviceProviders, GetRequiredService<CatalogContext>(), which returns the CatalogContext (a DbContext) only when it is ready, save a handle to it.
+-- Pass the saved context to CatalogSeed.Seed(context)
+-- (The scope gets disposed at the end of the block.)
+-- Run() the host
+
+
+- Powershell:
+    View > Other Windows > Package Manager Console
+    PM> "Add-Migration Initial"
+    Convert the instructions about WHERE, WHAT and HOW to create tables (from your CatalogContext class) to SQL-like syntax using the AddMigration Powershell script. The Migrations folder appears with the Initial migration inside.
+- (Note to self:)
+    Migration(s) applied automatically to the db since Seed() calls Migrate() on the DbContext before seeding the db with data. No need to use the UpdateDatabase Powershell script.
+
+
+- View > SQL Server Object Explorer:
+    Verify that MSSQLLocalDB is there and that CatalogDb is not (from Kal's code or previous run)
+--  If MSSQLLocalDB is not there, add it.
+    Refresh list (blue circle arrow).
+    Open MSSQLLocalDB, delete CatalogDb if present.
+- VS Toolbar / Select Startup Item (green run arrow):
+    Run IIS Express (not Docker, Docker is not set up yet)
+- View > SQL Server Object Explorer:
+    Refresh list (blue circle arrow).
+    Ensure that CatalogDb is present: MSSQLLocalDB > Databases > CatalogDb
+    Open Tables, right click on a CatalogX table and View Data to verify data in db.
+
+
+---
+
+Class #12 3-8-20
+Navigation:
+
+- Dockerfile
+- ProductCatalogApi\Controllers\PicController.cs
+- Run (green arrow) in IIS Express + web browser
+- Test in Postman
+
+
+
+
+Dockerizing your application
+Dockerize your microservice
+
+Dockerfile contains instructions to be executed on the linux vm
+
+** TODO **
+Have someone walk me through the Dockerfile with precision and clarity
+
+
+<< Where I stopped making well-formed precise notes, and switched to making rougher, "signpost-notes" >>
+
+
+PicController.cs
+
+(microservice) Controller class attributes (two):
+[Route("api/[controller]")]
+    // Route is a part of the URL
+    // App will be hosted on a port
+    // http://localhost:whateverport/restofthepathhereistheroute
+    //                              /api/pic
+
+    // Second attribute:
+    // I am an Api
+    [ApiController]
+
+Controllers inherit from ControllerBase
+    public class PicController : ControllerBase
+
+
+
+On controller class, each individual method is an api
+
+
+API/method parameter extracted from URL:
+    Attribute on method:
+        // On server-side code, we mark every api with its request type
+        [HttpGet("{id}")]
+
+                // Recall since GET request, user will not send any request body.
+        // All data will come through the URL
+
+        // When you get a GET request, whatever is in the curly braces will be
+        // extracted into a variable of name id. 
+
+Default route on a controller:
+            // But wait, it's not /api/pic/getimage/1...why not?
+        // Leaving off the /getimage means that whenever you get to
+        // the PicController by going to /api/pic, you'll automatically
+        // get routed to GetImage.
+
+
+Constructing file paths to resources in wwwroot:
+
+    Dependency Injection (DI) for getting the location of the wwwroot folder:
+                // To recieve injection, modify the contstructor of the class
+
+                // Microservices controller inject the path in which this
+                // service is deployed.
+
+                // To recieve injection, modify the contstructor of the Controller class
+
+                        public PicController(IWebHostEnvironment env) : base()
+
+                Note that you don't have to modify the declaration line of the class,
+                only its constructor
+
+                IWebHostEnvironment
+
+
+    Use Path.Combine() to construct the path to your hosted resources:
+        ("done in a cross-platform way"
+
+
+    Reading binary files and serving them back to the user:
+        System.IO.File.ReadAllBytes()
+
+                    // Must fully resolve File class name since there is a name collision with base class ControllerBase
+
+    Call ControllerBase.File(Byte[], String) to return a FileContentResult
+            // Inheritance
+            // Object -> ActionResult -> FileResult -> FileContentResult
+            // Also ActionResult : IActionResult
+            // Therefore, FileContentResult implements IActionResult
+            // (is convertable to that type)
+
+
+
+- Test API IIS/Browser
+    // Go to the browser window that opened and modify the url
+    // http://localhost:52750/api/pic/1
+
+- Test in Postman
+
+
+
+---
+
+Class #13 3-14-20
+Navigation:
+
+- Controllers\CatalogController.cs
+- appsettings.json (add ExternalCatalog)
+- ViewModel\PaginatedItemsViewModel.cs
+
+
+- Add CatalogController
+First api that is meaningful to containerize
+
+Of note for Kal starting with the PicController as the first controller...
+it only relied on the file system (injected Iwebhostenv)
+did not need a db connection
+
+
+
+/api/catalog
+
+
+- Inject CatalogContext context into CatalogController controller
+
+
+QUESTION:
+Could have done DI with the CatalogSeed class instead of passing the context to the Seed method directly?
+Is it only done by direct passing because it is so convenient to do so?
+The method that tells us it is ready returns exactly the reference we need, so why not simply pass it?
+
+QUESTION:
+Are there other use cases for looking up the db context as we did in Main, or is it always preferred to use DI?
+
+
+- Query database table(s) to get needed data
+
+
++Almost all apis should be async (all apis that are called from the front end)
+        // Async: Don't want to block your webui.
+        // Don't want to block your front end from accessing your api back end.
+
+
+
++ Three ways to accept route params:
+    * from uri
+        (by [HttpGet("{id}")] as we did with PicController.GetImage)
+        (or by [Route("[action]/{pageIndex}/{pageSize}")] as we *nearly* did with CatalogController.Items)
+    * from query (the old way)
+    http://jsdfkjdslkj/?k=v&k=v
+    * From body
+    we will do when talking about post
+
+
+- Paginating data from a database (instead of returning all of it):
+
+Given a page size and page number/index,
+return the appropriate set of items to the caller
+
+(UI logic must mimic this pattern)
+
+Skip and take:
+    How many records to skip
+    How many records to take
+
+
+
+(Always provide defaults for URL params to prevent breaking.)
+
+
+- Items api done with [FromQuery] http://jsdfkjdslkj/?k=v&k=v
+
+
+
+- Recall IActionResult
+    ? Was there a Task<> around IActionResult of GetImage?
+    Is there a 1:1 correlation between a method being async and needing Task<> around its return type?
+    Is it Task's job to run the (remind me name of method) on the IActionResult return object?
+    Is Task<> only ever used with IActionResult?
+    Is IActionResult only ever used with Task<>?
+
+    Ok() asp.net method returns a Task<IActionResult>?
+
+
+    ? IActionResult represents an api return object whose value is immediately avail upon return (as with PicController), that is, from a non-async (synchronous) api.
+
+    ? Task<IActionResult> represents an api return object whose value may not be immediately avail upon return (as with Item), that is, from an async api.
+        QUESTION: How does the caller know when the value is ready?
+
+
+- Test in Postman
+    Create collection to save queries
+            // Remember to make sure that the correct request type is selected:
+            // GET, POST, etc.
+
+
+- appsettings.json: Fix the pic url
+    Did not seed full path into pic urls
+    Port number may differ also docker
+
+    Inject IConfiguration into CatalogController class (via constructor)
+
+    Then replace all of the placeholder text in the pic urls with the correct path:
+    Set the PictureUrl property on each item with the value looked up in appsettings.json by key/value lookup
+
+                // When an object (_config) refers to the IConfigration object
+            // that is read in from the appsettings.json
+            // Treat the object as a dictionary and use array subscript notation
+            // to look up the value by key:
+            // _config["Key"]
+
+
+    + Port number of the container hosting the pic files is fixed as of the time of deployment
+
+
++ Never accept port numbers as params, big security risk
+
+
++ CatalogController api is one api that calls another (PicController)
+QUESTION: CatalogController doesn't directly call PicController, though, right?
+It converts the url, but the PicController is queried by the user of CatalogController?
+
+
+- help out the client
+    also give more info about data that you are sending
+    things that the view needs to know in order to be able to render properly
+        how do I know how many items I really got?
+        how many are left?
+        how does ui know?
+-- Revise Items api to return a PaginatedItemsViewModel<CatalogItem> (instead of a ...)
+Make a viewmodel called PaginatedItemsViewModel<>
+Generic so can re-use the paginated feature for other data
++ no difference between ViewModel in MVC and ViewModel in MVVM
+---What is all the data that the page needs?
+    PageIndex
+    PageSize
+    ItemCount
+    Data (collection of items)
+
+
+Now, Items()
+returns a wrapped PaginatedItemsViewModel<CatalogItem> instead of a wrapped List<ViewItem>
+Wrapper is an OkObjectResult
+
+QUESTION:
+In this example of MVC,
+Instead of the ViewModel querying the model for the data it needs, the controller returns a ViewModel to the view?
+
+
++ If number of records won't fit in a long...that's millions of records
+    Better to consider partitioning the data
+    Archiving old data, keeping the data clean.
+
+
++ When you query the db, you need to await an async method
+
+
+- Test in Postman again
+ (See PaginatedViewModel working)
+
+***
+THIS IS WHERE I LEFT OFF WITH FOLLOW-ALONG ON SUN 3/29/20
+NO MORE EDITS TO FOLLOW ALONG PROJECT AFTER THAT
+ONLY READING OVER LIVE-TYPED CLASS NOTES FOR PRE-ASSIGNMENT 3A OVERVIEW
+FOR A BIT
+***
+
+ ---
+
+Class #14 3-15-20
+Kal Academy Bootcamp Notes (Class #14) Week 7 Sun 3-15-20
+https://docs.google.com/document/d/1Hhj9qWETXj2Dt_1q7mrCGWdVG0jFaLiwDtjdjSWL_vs/edit
+
+Navigation:
+- docker yaml file
+- ProjectCatalogApi\Properties\launchSettings.json
+- Powershell docker commands (to see current images and containers)
+- VS to run project from docker-compose
+
+
+-Set Up Docker Compose as Container Orchestrator Support
+
+Docker Compose is a lightweight orchestrator
+(vs. Kubernetes, which is a heavyweight orchestrator)
+
+    https://docs.docker.com/compose/
+
+    "Compose is a tool for defining and running multi-container Docker applications. With Compose, you use a YAML file to configure your application’s services. Then, with a single command, you create and start all the services from your configuration."
+
+    Using Docker Compose is basically a three-step process:
+
+        Define your app’s environment with a Dockerfile so it can be reproduced anywhere.
+
+        Define the services that make up your app in docker-compose.yml so they can be run together in an isolated environment.
+
+        Run docker-compose up and Compose starts and runs your entire app.
+
+Container Orchestration
+handles dependencies between containers
+need sql to be up before catalog starts
+
+
+ ---
+
+Class #15 3-21-20
+Kal Academy Bootcamp Notes (Class #15) Week 8 Sat 3-21-20
+https://docs.google.com/document/d/13SE3tiZ6XL3ojOKSxtzSpMSCxdCjTlzF2NwWsh2UCT4/edit
+
+Navigation:
+- Create WebMVC project
+- PREVIEW: Services\CatalogService
+- Infrastructure\ApiPaths
+- Infrastructure\IHttpClient
+
+
+* PREVIEW WebMVC CatalogService: (See Class #16 3-22-20 for implementation of CatalogService)
+Write the service on the WebMVC side, CatalogService, that:
+    - Accepts requests from the WebMVC controllers (incl. CatalogController)
+    - Constructs the string url for calling the microservice api
+    - Sends http request to the microservice api, gets response in JSON format
+    - Deserializes the JSON into Models (the ones copied/adapted from the microservice)
+    - Responds to the WebMVC controller with the data it requested
+
+Recall importance for WebMVC controllers to not communicate directly with microservices. This does not scale well. Want to route requests through the WebMVC services which will communicate to microservices through a gateway. This allows for load balancing, etc.
+
+
+
+* WebMVC ApiPaths:
+Construct the string url for calling the microservice api right now
+GetAllCatalogItems() with baseUri, page and take
+As required by the Api controller, use query notation:
+http://baseUri/items?key={value}&key={value}
+"http://catalog/api/catalog/items?pageIndex=0&pageSize=10"
+
+
+
+* WebMVC IHttpClient:
+Interface for use by multiple WebMVC services (catalog, cart, etc.)
+Async methods taking a uri, authToken, authMethod
+Post/Put/Delete: Generic Task<HttpResponseMessage> return type (for sending different types of data to the microservice apis)
+Get: Simple Task<string>
+
+
+---
+Class #16 3-22-20
+Kal Academy Bootcamp Notes (Class #16) Week 8 Sun 3-22-20
+
+Navigation:
+- Infrastructure\CustomHttpClient
+- Services\ICatalogService
+- ProductCatalogApi\ViewModels\PaginatedItemsView -> WebMVC\Models\Catalog
+- ProductCatalogApi\Domain\CatalogItem -> WebMVC\Models\CatalogItem
+- Services\CatalogService
+    * Startup
+- Controllers\CatalogController
+    * Startup
+- Views\Catalog\Index.cshtml
+- WebMVC Dockerfile
+- docker_compose.yml
+
+
+CustomHttpClient : IHttpClient
+
+Constructor: Create a real HttpClient provided by .net core
+Use to make actual apicalls (Don't do DI for this. This HttpClient not change over time. We're not going to switch protocols.)
+
+CustomHttpClient.GetStringAsync()
+
+Create new requestMessage using the correct HttpMethod (get/put/post/delete) and the parameter uri
+SendAsync and await the response
+Mimic the send button, but do it in code:
+ReadAsStringAsync() the Content of the response and await the result, then return that Task<string>
+* This is the actual, literal call from the WebMVC service to the microservice *
+
+NOTE / QUESTION:
+System.Net.Http.HttpMethod : IEquatable<HttpMethod>
+is a class that acts a lot like an enum. Is there a name for this pattern?
+
+
+ICatalogService
+Controllers (CatalogController) needs to know what methods it can call on the service (CatalogService)
+
+ICatalogService.GetCatalogItemsAsync()
+?? QUESTION / CLARIFICATION:
+Look at CatalogController class not the WebMVC CatalogController, rather the ProductCatalogApi microservices CatalogController)
+    JSON of PaginatedItemsViewModel<CatalogItem>
+
+
+
+
+
+
+* WebMVC Models:
+Replicate/adapt domain/model classes from the microservices side to the WebMVC side (to facilitate deserializing json to objects and allow for OOP)
+Want WebMVC and microservice to be loosely coupled (not tightly bound by dependencies)
+
+services (microservices)
+    ProductCatalogApi (microservice project)
+        Domain
+            CatalogBrand
+            CatalogItem
+            CatalogType
+        ViewModel
+            PaginatedItemsViewModel<>
+...
+web (web applications)
+    WebMVC
+        Models
+            Catalog
+            CatalogItem
+
+* CatalogItem Model
+WebMVC\Models\CatalogItem comes from ProductCatalogApi\Domain\CatalogItem 
+CatalogBrand and CatalogType classes aren't needed (the WebMVC side has no db)
+Their fields on CatalogItem can be simple strings instead of virtual class object references. Retain the Id foreign key fields, still need these.
+
+* Catalog Model
+WebMVC\Models\Catalog comes from ProductCatalogApi\ViewModel\PaginatedItemsViewModel<>
+Catalog is special-purpose, so need not be generic. Data property can be special cased to List<CatalogItem>
+
++ JSON doesn't keep the names of the types, only the structure of the data
+
+
+
+
+CatalogService : ICatalogService
+
+Why not just have CatalogService? Different companies might be writing different implementations for it. Amazon may have mulitple manufacturers giving them catalogs. Mfrs giving Amazon data to represent in their application.
+
+CatalogService.GetCatalogItemsAsync()
+Uses ApiPaths
+
+
+
+* WebMVC CatalogService: (Kal overviewed this first on day prior: Class #15 3-21-20)
+Write the service on the WebMVC side, CatalogService, that:
+    1) Accepts request from WebMVC controller (CatalogController)
+    2) Constructs the string url (ApiPath) for calling the microservice api
+    3) Sends http request to the microservice, gets response in JSON format
+    4) Deserializes the JSON into Models (the ones copied/adapted from the microservice)
+    5) Responds to the WebMVC controller with the data it requested
+
+Recall importance for WebMVC controllers to not communicate directly with microservices. This does not scale well. Want to route requests through the WebMVC services which will communicate to microservices through a gateway. This allows for load balancing, etc.
+
+
+Constructor:
+    baseUri comes from env var for docker container dependency injection (or IIS if you're still using that) _baseUri = $"{config["CatalogUrl"]}/api/catalog/"
+    client comes from IHttpClient injection (see services add below)
+
+
+
+public async Task<Catalog> CatalogService.GetCatalogItemsAsync(int page, int size)
+Get the catalogItemsUri to use for the api call:
+    Use ApiPaths.Catalog.GetAllCatalogItems(), given the baseUri, the page num and the items-per-page
+Make the api call on the http client with the uri:
+    Use CustomHttpClient object (via injected IHttpClient reference) to GetStringAsync of catalogItemsUrl. Await the result and store in dataString
+
+** Pause, go to Startup.cs
+
+    In Startup.ConfigureServices()
+        As a singleton, add CustomHttpClient as the implementation of IHttpClient:
+            services.AddSingleton<IHttpClient, CustomHttpClient>();
+            "Use CustomHttpClient as the implementation of IHttpClient"
+                throughout my service, there will be services that will ask for this
+        See how loosely coupled? So nice.
+        (Not references to the implementation class littered through code.)
+
+** Return to CatalogService.cs
+
+Deserialize the result:
+    Find and install the Newtonsoft Json NuGet package (just to the WebMVC project)
+    Use JsonConvert.DeserializeObject<> to deserialize dataString into an object of type Catalog (recall that the WebMVC.Models.Catalog class corresponds to -and is adapted from- the  ProductCatalogApi.ViewModels.PaginatedItemsViewModel<CatalogItem> class which is serialized to json and returned by the ProductCatalogApi.Controllers.CatalogController.Items microservice...well, wrapped in a Task<IActionResult>)
+Return the Catalog object wrapped in a Task<> (Catalog object contains the desired List<CatalogItem> Data, WebMVC CatalogItem is directly analogous to microservice CatalogItem)
+
+Now this WebMVC service (CatalogService) is returning back to a controller (CatalogController)
+
+
+
+CatalogController : Controller (this is WebMVC controller)
+
+?? how/why know CatalogController.Index returns a Task<IActionResult> ??
+Answer: Boilerplate code includes it when create the controller.
+Default implementation is return View();
+
+Controller.View()
+Creates a ViewResult object by specifying a model to be rendered by the view.
+
+No apparent constraints on type of the model (viewmodel) to be rendered by the view.
+
+View() returns a ViewResult
+ViewResult : IActionresult
+
+namespace Microsoft.AspNetCore.Mvc
+{
+    public abstract class Controller : ControllerBase, IActionFilter, IFilterMetadata, IAsyncActionFilter, IDisposable
+        // Summary:
+    //     A base class for an MVC controller with view support.
+    {
+        [NonAction]
+        public virtual ViewResult View(object model);
+        // Summary:
+        //     Creates a Microsoft.AspNetCore.Mvc.ViewResult object by specifying a model to
+        //     be rendered by the view.
+        //
+        // Parameters:
+        //   model:
+        //     The model that is rendered by the view.
+        //
+        // Returns:
+        //     The created Microsoft.AspNetCore.Mvc.ViewResult object for the response.
+
+namespace Microsoft.AspNetCore.Mvc
+{
+    public class ViewResult : ActionResult, IActionResult, IStatusCodeActionResult
+    // Summary:
+    //     Represents an Microsoft.AspNetCore.Mvc.ActionResult that renders a view to the response.
+
+
+====
+
+PICKED UP WITH WRITING NEW ON THURS 4-2-20
+
+====
+
+Try to find a view for you in the views:
+            return View(catalog);
+
+Make Catalog folder in Views
+folder name inside views should match controller name
+
+** Pause, go to Startup.cs
+
+    In Startup.ConfigureServices()
+        As a transient, add CatalogService as the implementation of ICatalogService:
+            services.AddTransient<ICatalogService, CatalogService>();
+            "Use CatalogService as the implementation of ICatalogService"
+
+** Return to CatalogController.cs
+
+- Inject ICatalogService service into CatalogController controller
+
+- Make the call from CatalogController to CatalogService
+To request catalog, GetCatalogItemsAsync from the service with the page num and the items per page
+Return a View of the catalog (this returns to framework code)
+
+For now, simply return whatever data we get back (a raw string of data) directly to the view
+
+
+Add a View (cshtml)
+Right click on method name in a WebMVC controller, Add View...
+Crates a new .cshtml file with same name as method in the WebMVC\View folder correspond to the controller class of the method.
+
+
+
+For testing:
+(Cheat and refer to Kal's code)
+Fixup the autogen Index.cshtml to see that it is working
+fixup: remove IEnumerable
+Recall in Catalog, Data is the one that is enumerable
+
+
+Dockerize WebMVC Project
+Right click on WebMVC project Add Docker Support 
+copy the good docker file from product catalog api
+change everywhere you say ProductCatalogApi replace WebMVC only in current document
+
+
+Modify docker_compose.yml for WebMVC
+
+** TODO **
+Cheat and look at Kal's yaml file
+
+
+Test the entire flow:
+1) ensure microservice is running in postman
+2) Test WebMVC localhost:5210/catalog/ (adjust port based on yaml file if necessary)
+
+
+---
+Class #17 3-28-20
+Kal Academy Bootcamp Notes (Class #17) Week 9 Sun 3-28-20
+https://docs.google.com/document/d/1tcoZXXghSn0z3zFIB_Iygk2nmI02B8OVRKrZbbUKFUY/edit
+
+Navigation:
+
+
+
+
+Three ways to run docker:
+    Locally:
+        through VS
+        command prompt
+    Kubernetes - in the cloud
+
+
+
+if you shut down vs
+image is still there
+container is still there
+but container not running anymore
+is now stopped
+
+
+IMPORTING HTML AND STUFF KAL PROVIDED
+Return to video and/or written notes
+If looking at Kal's version from a given week is not enough
+
+
+
+_ViewImports.cshtml
+global file of using statements across all the views
+add:
+@using WebMVC.Models
+
+
+_ViewStart.cshtml
+Use a common layout across all html pages.
+All pages have a common header, footer, menu.
+Only body page content changes.
+
+
+Shared\_Layout.cshtml
+Standard layout provided
+Don't use standard layout. Use Kal's instead.
+@RenderBody() section will be replaced by current view
+
+REFER TO Class17 branch for this
+when came to this page
+have to make change, comment something out
+this is completed code, expecting you to have cart, identity
+but not built yet
+
+
+** Cannot change html, save and refresh **
+Image was already built. It's running as a container in Docker.
+(But at least we can do debugging.)
+
+
+Catalog\Index.cshtml
+What is "Model"
+every html page gets data
+think of MVC as triangle
+this is the data sent from the WebMVC's CatalogController back to the View
+
+
+Identify needs of View:
+drop down here shows all brands user can choose from
+also pagination
+prev, next
+same pagination on top and bottom
+
+
+take page size to figure out appropriate pagination
+for this page to show up, we also need brands and types
+
+
+Create one ViewModel (CatalogIndexViewModel) for this entire Catalog\Index page
+
+
+
+on webmvc side
+build webmvc model
+if build up data to get data as you want it
+
+
+
+pagination info job
+reflect what need to have pagination work
+used on catalog index view model
+
+
+
+
+
+brands drop down
+user selected one of them
+get all filtered data for me from that brand
+
+comes back to display data
+now show what was selected
+tiffany and co
+
+tracking what was selected
+which type was selected
+
+int? nullable type
+
+
+Controller's job to get the data and fill this page
+ViewModel bound to View
+Thus, must make change in CatalogController
+Must send ViewModel (not raw data) back to the View
+
+
+Index page:
+@model WebMVC.ViewModels.CatalogIndexViewModel
+expects ViewModel
+
+
+Are there any CatalogItem to show?
+<div class="container">
+    @if (Model.CatalogItems.Count() > 0)
+
+Razor poor naming convention:
+    yes, lowercase m means class type
+    yes, uppercase M means instance of a class type
+        "Model" means the instance of CatalogIndexViewModel that the page is bound to
+
+
+Pagination:
+make a component out of this
+place component as many times as want on the page
+
+build html component
+        @Html.Partial("_pagination", Model.PaginationInfo)
+
+wrote control called pagination
+load it at the top, at the bottom
+
+ask html helper of asp.net to display data
+components generally cannot render by themselves
+partial component
+render on the page
+
+
+
+QUESTION:
+I don't understand how this works on _pagination.cshtml:
+    asp-controller="Catalog"
+    asp-action="Index"
+    asp-route-page="@(Model.ActualPage + 1)"
+    Oh wait, I think it does CatalogController.Index(currentPage + 1);
+    That is the "page" in asp-route-page is the parameter passed
+    The "action" is the method on the controller
+
+
+
+Recall the Take, Skip logic that we did when selecting the data in the ProductCatalogApi.CatalogController.Index() method/api?
+Now we need to mirror that here in WebMVC.CatalogController.Index()
+
+
+If there are more items to show than fit on one page, show pagination on top and bottom. (Actually, it looks like the pagination controls will show even if only one page of results happen. Oh wells!)
+
+
+
+Made a component to show each CatalogItem, too:
+_product.cshtml
+
+@model WebMVC.Models.CatalogItem
+
+
+Done binding page to ViewModel!
+
+
+Finally, In WebMVC.CatalogController.Index(), construct the PaginationInfo object inside the CatalogIndexViewModel()
+
+Recall class initialization syntax (without ())
+Also (of course) can nest this syntax while new-ing a PaginationInfo directly into the PaginationInfo property on the CatalogIndexViewModel
+
+Calculate the count, of total number of pages to show in the view
+(Recall integer division and use ceiling)
+
+"Simplified ternary operator"
+ActualPage = page ?? 0
+page == null ? 0 : page.Value
+(also recall the value-or-default method on nullable value types)
+
+
+
+Finally, return the viewmodel object (rather than catalog) back to the View:
+            return View(vm);
+
