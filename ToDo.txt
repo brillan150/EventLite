@@ -13,13 +13,17 @@ Get buy-in for these domain classes
 
 entity framework install
 
-set up db in iis
+
 
 entity framework
 catalogcontext
 where
 what
 how
+
+
+set up db in iis
+
 
 set up sql server
 // Name:              Initial Catalog=CatalogDb < ***IMPORTANT! NOT MASTER!***
