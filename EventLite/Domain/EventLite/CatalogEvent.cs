@@ -57,11 +57,11 @@ namespace EventLite.Domain.EventLite
 
         // Total number of ticket sales allowed for this event
         // across all types of tickets offered.
-        public int TotalTicketLimitAllTypes { get; set; }
+        //public int TotalTicketLimitAllTypes { get; set; }
 
         // Price, ticket limit and sales end date for each type of ticket offered
         // for this event.
-        public List<TicketType> TicketTypes { get; set; }
+        //public List<TicketType> TicketTypes { get; set; }
         // QUESTION:
         // In JewelsOnContainer, we didn't have a collection inside the 
         // CatalogItems type. Is there anything we need to know about doing this?

@@ -2,17 +2,47 @@ ToDo
 
 
 
-
-
-
 *** Assignment 3a
+
+done:
+create domain
 
 
 ~~ Sooner
+Get buy-in for these domain classes
+
+entity framework install
+
+set up db in iis
+
+entity framework
+catalogcontext
+where
+what
+how
+
+set up sql server
+// Name:              Initial Catalog=CatalogDb < ***IMPORTANT! NOT MASTER!***
+
+
+sample data
+make up text
+royalty free images
+nice to have: read in from disk
+
+
+split up
+
+
+
+
+
 
 
 ~~ Later
 
+APIs working first
+Docker setup
 
 
 *** Assignment 3b

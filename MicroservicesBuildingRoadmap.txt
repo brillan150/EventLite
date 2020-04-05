@@ -41,7 +41,6 @@ Talk to local db before containerizing to docker container
         //        some columns to be of a certain size
         //    (rules about how table to be created)
 
-
 ? Tables
 CatalogContext.cs in Data folder of project
 
