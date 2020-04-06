@@ -338,13 +338,13 @@ The high Level overview of today:
 -- CatalogSeed.GetPreconfiguredCatalogItems():
     Include placeholder host/domain path for wwwroot files: "http://externalcatalogbaseurltobereplaced/api/pic/1"
 --- File Explorer / Solution Explorer (ProductCatalogApi.wwwroot):
-    For all conent to be deployed with app (ex. jewels pics, shoes pics), create and drag files to wwwroot folder in ProductCatalogApi project.
+    For all content to be deployed with app (ex. jewels pics, shoes pics), create and drag files to wwwroot folder in ProductCatalogApi project.
 
 
 
 - Program.cs:
     High level:
-    Kick of building the host, wait for the db context to be ready, seed the db, then run the host.
+    Kick off building the host, wait for the db context to be ready, seed the db, then run the host.
 -- Build() the host and save a handle to it; don't Run() it yet.
 -- In a using statement (for Dispose()), CreateScope() on the Services of the host and save a handle to it.
 -- Save a handle to the ServiceProvider of the scope.

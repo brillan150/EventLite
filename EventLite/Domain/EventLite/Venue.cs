@@ -1,5 +1,10 @@
 ﻿namespace EventLite.Domain.EventLite
 {
+    // TODO:
+    // Figure out why can't have this type as composed object o
+    // CatalogEvent (see also CatalogContext)
+
+
     // Site design does not support looking up, sorting or filtering by venue,
     // so Venue does not need to be a table in the db, right?
     // Given that, does having a Venue class type cause any sort of issue with

@@ -33,8 +33,8 @@ namespace EventCatalogApi.Data
                 
             }
 
+            context.SaveChanges();
 
-        
         }
 
         private static IEnumerable<CatalogEvent> GetPreconfiguredCatalogEvents()
@@ -52,18 +52,26 @@ namespace EventCatalogApi.Data
                     Start = storedStart = DateTime.Today.AddDays(1).AddHours(12),
                     End = storedStart.AddHours(9),
                     PictureUrl = "http://externalcatalogbaseurltobereplaced/api/pic/1",
-                    
+
+                    VenueName = "Washington State Convention Center",
+                    VenueAddressLine1 = "705 Pike St.",
+                    VenueCity = "Seattle",
+                    VenueStateProvince = "WA",
+                    VenuePostalCode = "98101",
+                    VenueMapUrl = "http://TODOREPLACEME/",
+
+
                     // TODO: Understand why this syntax works for Venue property vs.
                     // Hypothetical Venue2 field (see CatalogEvent)
-                    Venue = new Venue
-                    {
-                        Name = "Washington State Convention Center",
-                        AddressLine1 = "705 Pike St.",
-                        City = "Seattle",
-                        StateProvince = "WA",
-                        PostalCode = "98101",
-                        MapUrl = "http://TODOREPLACEME/"
-                    },
+                    //Venue = new Venue
+                    //{
+                    //    Name = "Washington State Convention Center",
+                    //    AddressLine1 = "705 Pike St.",
+                    //    City = "Seattle",
+                    //    StateProvince = "WA",
+                    //    PostalCode = "98101",
+                    //    MapUrl = "http://TODOREPLACEME/"
+                    //},
                     HostOrganizer = "Fancy Food Company",
                     CatalogFormatId = 3,
                     CatalogTopicId = 3,
