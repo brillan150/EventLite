@@ -50,7 +50,11 @@ namespace EventLite.Domain.EventLite
         // hard-coded would be beneficial.
         
         // Street address of the event's location
-        public Venue Venue { get; set; }
+        public Venue Venue { get; set;  }
+
+        // TODO: Figure out about init list syntax (see CatalogSeed)
+        //public Venue Venue2;
+        //public Venue Venue3 { get { return new Venue(); } set { } }
 
         // "Fancy Food Company"
         public string HostOrganizer { get; set; }

@@ -15,7 +15,7 @@ namespace EventCatalogApi.Data
 
 
         // What
-        public DbSet<CatalogEvent> CatalogEvent { get; set; }
+        public DbSet<CatalogEvent> CatalogEvents { get; set; }
 
         public DbSet<CatalogFormat> CatalogFormats { get; set; }
 
@@ -38,11 +38,11 @@ namespace EventCatalogApi.Data
 
             modelBuilder.Entity<CatalogEvent>(entity =>
                 {
-                    entity.ToTable("Catalog");
+                    entity.ToTable("CatalogEvents");
 
                     entity.Property(e => e.Id)
                         .IsRequired()
-                        .UseHiLo("catalog_hilo");
+                        .UseHiLo("catalog_event_hilo");
 
                     entity.Property(e => e.Title)
                         .HasMaxLength(100)
@@ -99,7 +99,7 @@ namespace EventCatalogApi.Data
 
                     entity.HasOne(e => e.CatalogFormat)
                          // TODO: Figure out hypothetical for why doesn't work (see: CatalogFormat)
-                         //.WithMany(f => f.CatalogEvent)
+                         //.WithMany(f => f.CatalogEvents)
                          .WithMany()
                          .HasForeignKey(e => e.CatalogFormatId);
 

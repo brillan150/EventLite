@@ -2,7 +2,7 @@
 
 namespace EventLite.Domain.EventLite
 {
-    // TicketType objects are specific to each CatalogEvent
+    // TicketType objects are specific to each CatalogEvents
     // TicketType does not need a table in the db.
     public class TicketType
     {

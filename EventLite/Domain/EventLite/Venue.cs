@@ -26,6 +26,6 @@
         // for there to be two versions of a domain/model type
         // within a microservice? No state is maintained in the
         // MapUrl property, so it seems like a waste to have this field
-        // stored for each CatalogEvent in the database. Thoughts?
+        // stored for each CatalogEvents in the database. Thoughts?
     }
 }
