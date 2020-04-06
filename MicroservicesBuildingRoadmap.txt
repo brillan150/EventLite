@@ -236,7 +236,7 @@ Don't put your personal tables in the master db. That is for keeping track of al
 
 
 >>>
-Put at the very top of appsettings.json (outside of everything)
+Put at the very top of appsettings.json inside outer braces
 
 "Connection String" in double quotes, a colon (:), then the connection string in double quotes, followed by a comma (,)
 
@@ -328,7 +328,7 @@ services.AddDbContext<CatalogContext>(
 
 Class #11 3-7-20
 
-High Level of today:
+The high Level overview of today:
 
 - CatalogSeed.cs:
     Write CatalogSeed class and Seed() method for seeding the db with sample data
