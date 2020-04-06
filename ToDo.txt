@@ -1,5 +1,155 @@
 ToDo
 
+replicate plumbing prework through class #11
+
+
+split up (don't replciate) implementing apis
+
+
+CatalogController
+
+        [HttpGet]
+        [Route("[action]")]
+        public async Task<IActionResult> Items(
+            [FromQuery]int pageIndex = 0, 
+            [FromQuery]int pageSize = 6)
+
+                    [HttpGet]
+        [Route("[action]/type/{catalogTypeId}/brand/{catalogBrandId}")]
+        public async Task<IActionResult> Items(
+            int? catalogTypeId,
+            int? catalogBrandId,
+            [FromQuery]int pageIndex = 0,
+            [FromQuery]int pageSize = 6)
+
+
+private List<CatalogItem> ChangePictureUrl(List<CatalogItem> items)
+
+    public class PaginatedItemsViewModel<TEntity>
+        where TEntity : class
+
+
+
+    ---
+
+        [HttpGet]
+        [Route("[action]")]
+        public async Task<IActionResult> CatalogTypes()
+
+
+        [HttpGet]
+        [Route("[action]")]
+        public async Task<IActionResult> CatalogBrands()
+
+
+    PicController
+
+                [HttpGet("{id}")]
+        public IActionResult GetImage(int id)
+
+
+
+replicate all docker work through class #14 (end of assignmnet 3a)
+
+
+checkpoints
+
+goals (eod)
+
+sun
+
+make seed data
+
+
+mon
+
+finish setup (through class #11)
+
+6:30pm call with andrea
+
+
+tues
+
+implement event version of same functionality as jewels apis (3)
+test in postman/iis
+
+
+
+
+
+fri
+
+class #14
+finish dockerization
+test in docker
+
+
+sat
+
+video and submit
+
+
+sun
+
+
+
+
+
+
+
+finish setup (everything beofre pic controller)
+
+make seed data
+
+
+implement event version of same functionality as jewels apis (3)
+
+test in postman/iis
+
+
+
+move to docker
+
+
+
+
+
+
+testing again in docker
+
+
+
+(extended design)
+decide
+Beyond what the jewels api does what else (in addition)
+does the event api need to do?
+determine endpoints and syntax
+
+(extended implementation)
+write the apis
+
+
+
+
+making the video
+
+
+
+
+3a is through class 14
+
+Two controllers
+Three apis
+
+
+
+
+
+
+DateTime/Venue:
+Has something to do with how entity framework is representing the objects in tables
+Or how aspnet is serializing into jason
+or how aspnet is deserializing back into objects
 
 
 *** Assignment 3a
