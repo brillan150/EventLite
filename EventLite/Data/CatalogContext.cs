@@ -121,7 +121,7 @@ namespace EventCatalogApi.Data
                     //entity.Property(e => e.Venue)
                     //    .IsRequired()
                     //    .HasMaxLength(100);
-                    // The property 'CatalogEvent.Venue' is of type 'Venue' which is not supported by current database provider. Either change the property CLR type or ignore the property using the '[NotMapped]' attribute or by using 'EntityTypeBuilder.Ignore' in 'OnModelCreating'.
+                    //The property 'CatalogEvent.Venue' is of type 'Venue' which is not supported by current database provider. Either change the property CLR type or ignore the property using the '[NotMapped]' attribute or by using 'EntityTypeBuilder.Ignore' in 'OnModelCreating'.
 
 
                     entity.Property(e => e.HostOrganizer)

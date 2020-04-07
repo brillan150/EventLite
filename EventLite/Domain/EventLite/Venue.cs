@@ -1,7 +1,7 @@
 ﻿namespace EventLite.Domain.EventLite
 {
     // TODO:
-    // Figure out why can't have this type as composed object o
+    // Figure out why can't have this type as composed object of
     // CatalogEvent (see also CatalogContext)
 
 

@@ -41,11 +41,12 @@ namespace EventCatalogApi.Data
         {
             DateTime storedStart;
 
-
             return new List<CatalogEvent>
             {
+
                 new CatalogEvent
                 {
+
                     Title = "14th Annual Soup Festival",
                     Description = "Soup Festival is all about soup! The ultimate liquid meal.",
                     // Always starts "tomorrow" Aren't you lucky!
