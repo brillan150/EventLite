@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using EventCatalogApi.Data;
+using EventCatalogApi.ViewModels;
+using EventLite.Domain.EventLite;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -49,10 +51,17 @@ namespace EventCatalogApi.Controllers
                 e.PictureUrl = e.PictureUrl.Replace(
                 "http://externalcatalogbaseurltobereplaced",
                 _config["ExternalCatalogUrl"]));
-                                  
 
 
-            return Ok( events );
+            var viewModel = new PaginatedItemsViewModel<CatalogEvent>
+            {
+                PageIndex = pageIndex,
+                PageSize = pageSize,
+                ItemCount = await _context.CatalogEvents.LongCountAsync(),
+                Data = events
+            };
+
+            return Ok( viewModel );
         }
 
 
