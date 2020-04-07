@@ -1,5 +1,10 @@
 ﻿namespace EventLite.Domain.EventLite
 {
+    // TODO:
+    // Figure out why can't have this type as composed object of
+    // CatalogEvent (see also CatalogContext)
+
+
     // Site design does not support looking up, sorting or filtering by venue,
     // so Venue does not need to be a table in the db, right?
     // Given that, does having a Venue class type cause any sort of issue with
@@ -26,6 +31,6 @@
         // for there to be two versions of a domain/model type
         // within a microservice? No state is maintained in the
         // MapUrl property, so it seems like a waste to have this field
-        // stored for each CatalogEvent in the database. Thoughts?
+        // stored for each CatalogEvents in the database. Thoughts?
     }
 }

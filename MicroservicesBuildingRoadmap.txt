@@ -236,7 +236,7 @@ Don't put your personal tables in the master db. That is for keeping track of al
 
 
 >>>
-Put at the very top of appsettings.json (outside of everything)
+Put at the very top of appsettings.json inside outer braces
 
 "Connection String" in double quotes, a colon (:), then the connection string in double quotes, followed by a comma (,)
 
@@ -328,22 +328,23 @@ services.AddDbContext<CatalogContext>(
 
 Class #11 3-7-20
 
-High Level of today:
+The high Level overview of today:
 
 - CatalogSeed.cs:
     Write CatalogSeed class and Seed() method for seeding the db with sample data
 -- CatalogSeed.Seed():
+*** MIGRATE PENDING CHANGES ON DB FIRST (Same as the "Update Database")
     Starting at tables with no dependencies, if no rows exist, add a range (collection) of preconfigured model/domain objects to the table on the DbContext. Save changes on the DbContext as needed before tables with dependencies on other tables.
 -- CatalogSeed.GetPreconfiguredCatalogItems():
     Include placeholder host/domain path for wwwroot files: "http://externalcatalogbaseurltobereplaced/api/pic/1"
 --- File Explorer / Solution Explorer (ProductCatalogApi.wwwroot):
-    For all conent to be deployed with app (ex. jewels pics, shoes pics), create and drag files to wwwroot folder in ProductCatalogApi project.
+    For all content to be deployed with app (ex. jewels pics, shoes pics), create and drag files to wwwroot folder in ProductCatalogApi project.
 
 
 
 - Program.cs:
     High level:
-    Kick of building the host, wait for the db context to be ready, seed the db, then run the host.
+    Kick off building the host, wait for the db context to be ready, seed the db, then run the host.
 -- Build() the host and save a handle to it; don't Run() it yet.
 -- In a using statement (for Dispose()), CreateScope() on the Services of the host and save a handle to it.
 -- Save a handle to the ServiceProvider of the scope.

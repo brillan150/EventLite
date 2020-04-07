@@ -48,9 +48,24 @@ namespace EventLite.Domain.EventLite
         // Surely, the route would not change after the API is shipped,
         // but during development, it seems like having this not
         // hard-coded would be beneficial.
-        
+
         // Street address of the event's location
+        public string VenueName { get; set; }
+        public string VenueAddressLine1 { get; set; }
+        public string VenueAddressLine2 { get; set; }
+        public string VenueAddressLine3 { get; set; }
+        public string VenueCity { get; set; }
+        public string VenueStateProvince { get; set; }
+        public string VenuePostalCode { get; set; }
+
+        public string VenueMapUrl { get; set; }
+
+
+
         public Venue Venue { get; set; }
+        // TODO: Figure out about init list syntax (see CatalogSeed)
+        //public Venue Venue2;
+        //public Venue Venue3 { get { return new Venue(); } set { } }
 
         // "Fancy Food Company"
         public string HostOrganizer { get; set; }

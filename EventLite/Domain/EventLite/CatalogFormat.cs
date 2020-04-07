@@ -11,5 +11,9 @@ namespace EventLite.Domain.EventLite
         public int Id { get; set; }
 
         public string Format { get; set; }
+
+
+        // TODO: Figure out hypothetical for why doesn't work (see: CatalogContext)
+        //public virtual CatalogEvents CatalogEvents { get; set; }
     }
 }
