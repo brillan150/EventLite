@@ -62,7 +62,7 @@ namespace EventLite.Domain.EventLite
 
 
 
-        public Venue Venue { get; set; }
+        //public Venue Venue { get; set; }
         // TODO: Figure out about init list syntax (see CatalogSeed)
         //public Venue Venue2;
         //public Venue Venue3 { get { return new Venue(); } set { } }
