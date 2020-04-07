@@ -6,6 +6,7 @@ using EventCatalogApi.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace EventCatalogApi.Controllers
 {
@@ -14,10 +15,12 @@ namespace EventCatalogApi.Controllers
     public class CatalogController : ControllerBase
     {
         CatalogContext _context;
+        IConfiguration _config;
 
-        public CatalogController(CatalogContext context)
+        public CatalogController(CatalogContext context, IConfiguration config)
         {
             _context = context;
+            _config = config;
         
         }
 
@@ -32,12 +35,27 @@ namespace EventCatalogApi.Controllers
 
         [HttpGet()]
         [Route("[action]")]
-        public async Task<IActionResult> Events()
+        public async Task<IActionResult> Events(
+            [FromQuery]int pageIndex = 0,
+            [FromQuery]int pageSize = 2)
         {
-            var events = await _context.CatalogEvents.ToListAsync();
-  
+            var events = await _context.CatalogEvents
+                .Skip(pageSize * pageIndex)
+                .Take(pageSize)
+                .ToListAsync();
+
+
+            events.ForEach(e =>
+                e.PictureUrl = e.PictureUrl.Replace(
+                "http://externalcatalogbaseurltobereplaced",
+                _config["ExternalCatalogUrl"]));
+                                  
+
+
             return Ok( events );
         }
+
+
 
 
     }
