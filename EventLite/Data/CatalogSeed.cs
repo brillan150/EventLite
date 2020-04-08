@@ -74,8 +74,8 @@ namespace EventCatalogApi.Data
                     //    MapUrl = "http://TODOREPLACEME/"
                     //},
                     HostOrganizer = "Fancy Food Company",
-                    CatalogFormatId = 3,
-                    CatalogTopicId = 3,
+                    CatalogFormatId = 1,
+                    CatalogTopicId = 2,
 
 
                     // TODO: Snap to nearest future Saturday
@@ -111,8 +111,8 @@ namespace EventCatalogApi.Data
                     //    MapUrl = "http://TODOREPLACEME/"
                     //},
                     HostOrganizer = "Fancy Food Company",
-                    CatalogFormatId = 3,
-                    CatalogTopicId = 3,
+                    CatalogFormatId = 2,
+                    CatalogTopicId = 2,
 
 
                     // TODO: Snap to nearest future Saturday
@@ -148,8 +148,8 @@ namespace EventCatalogApi.Data
                     //    MapUrl = "http://TODOREPLACEME/"
                     //},
                     HostOrganizer = "Fancy Food Company",
-                    CatalogFormatId = 3,
-                    CatalogTopicId = 3,
+                    CatalogFormatId = 1,
+                    CatalogTopicId = 1,
 
 
                     // TODO: Snap to nearest future Saturday
@@ -186,8 +186,8 @@ namespace EventCatalogApi.Data
                     //    MapUrl = "http://TODOREPLACEME/"
                     //},
                     HostOrganizer = "Fancy Food Company",
-                    CatalogFormatId = 3,
-                    CatalogTopicId = 3,
+                    CatalogFormatId = 1,
+                    CatalogTopicId = 2,
 
 
                     // TODO: Snap to nearest future Saturday
