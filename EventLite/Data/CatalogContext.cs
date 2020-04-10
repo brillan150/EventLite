@@ -32,9 +32,6 @@ namespace EventCatalogApi.Data
         // How
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // QUESTION:
-            // Want to know how to use the Type type overload of Entity
-
 
             modelBuilder.Entity<CatalogEvent>(entity =>
                 {
