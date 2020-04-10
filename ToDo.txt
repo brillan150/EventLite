@@ -16,7 +16,7 @@ CatalogController
             [FromQuery]int pageIndex = 0, 
             [FromQuery]int pageSize = 6)
 
-                    [HttpGet]
+        [HttpGet]
         [Route("[action]/type/{catalogTypeId}/brand/{catalogBrandId}")]
         public async Task<IActionResult> Items(
             int? catalogTypeId,

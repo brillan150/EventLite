@@ -77,9 +77,6 @@ namespace EventCatalogApi.Controllers
             [FromQuery]int pageIndex = 0,
             [FromQuery]int pageSize = 2)
         {
-            // !!! Currently not possible to filter only on format or only on topic
-            // Currently must filter on both
-
             var query = (IQueryable<CatalogEvent>)_context.CatalogEvents;
 
             if (catalogFormatId.HasValue)
