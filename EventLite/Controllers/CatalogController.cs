@@ -133,30 +133,21 @@ namespace EventCatalogApi.Controllers
             // TODO:
             // help. how does this work?
             // database caching??
-            
-            _context.SaveChanges();
-            
-            _context.Database.Migrate();
-
+            // For the objects that the events and query collection have in common,
+            // they point to the same object in memory. Specifically, you can
+            // use the events reference to modify the in-memory object,
+            // then if you:
+            //_context.SaveChanges();
+            //_context.Database.Migrate();
+            // the replaced PictureUrls would get committed to the db
+            // What is the lifetime of edits to the in-memory db objects?
+            // If we don't save changes and update the db here (which we wouldn't)
+            // are we still at risk of having these changes inadvertently
+            // written to the db if these commands are executed later?
 
 
 
             return Ok(viewModel);
-
-
-            // Only take events if
-            // format matches
-            // topic matches
-            // must match both
-
-
-            // Pagination
-            // Skip some, then take some
-
-
-
-            // Decide what to do if they specify a format or topic
-            // that doesn't exist
 
         }
 
