@@ -81,6 +81,12 @@ test in postman/iis
 
 fri
 
+
+
+Class #12 3-8-20
+- Dockerfile
+
+
 class #14
 finish dockerization
 test in docker

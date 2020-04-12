@@ -657,6 +657,8 @@ https://docs.google.com/document/d/1Hhj9qWETXj2Dt_1q7mrCGWdVG0jFaLiwDtjdjSWL_vs/
 
 Navigation:
 - docker yaml file
+- Update how connection string made in startup
+- Also any other key/values in appsettings.json (such as "ExternalCatalogBaseUrl")
 - ProjectCatalogApi\Properties\launchSettings.json
 - Powershell docker commands (to see current images and containers)
 - VS to run project from docker-compose

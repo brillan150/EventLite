@@ -28,12 +28,24 @@ namespace EventLite
         {
             services.AddControllers();
 
+ 
+
+            var server = Configuration["DatabaseServer"];
+            var database = Configuration["DatabaseName"];
+            var user = Configuration["DatabaseUser"];
+            var password = Configuration["DatabasePassword"];
+            var connectionString = $"Server={server};Database={database};User Id={user};Password={password}";
+
+
             // Where? For creating CatalogContext (when the runtime does it)
             // The DbContextOptions to build needs to say that the where
             // is a sql server, specifically, this sql server that is specified
             // in the appsettings.json by "ConnectionString"
+
+            //var connectionString = Configuration["ConnectionString"]);
+
             services.AddDbContext<CatalogContext>(builder =>
-                builder.UseSqlServer(Configuration["ConnectionString"]));
+                builder.UseSqlServer(connectionString));
 
         }
 

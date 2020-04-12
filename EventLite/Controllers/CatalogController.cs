@@ -54,7 +54,7 @@ namespace EventCatalogApi.Controllers
         //    events.ForEach(e =>
         //        e.PictureUrl = e.PictureUrl.Replace(
         //        "http://externalcatalogbaseurltobereplaced",
-        //        _config["ExternalCatalogUrl"]));
+        //        _config["ExternalCatalogBaseUrl"]));
 
 
         //    var viewModel = new PaginatedItemsViewModel<CatalogEvent>
@@ -118,7 +118,7 @@ namespace EventCatalogApi.Controllers
             events.ForEach(e =>
                 e.PictureUrl = e.PictureUrl.Replace(
                 "http://externalcatalogbaseurltobereplaced",
-                _config["ExternalCatalogUrl"]));
+                _config["ExternalCatalogBaseUrl"]));
 
 
             var viewModel = new PaginatedItemsViewModel<CatalogEvent>

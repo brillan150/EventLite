@@ -6,16 +6,20 @@ EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 WORKDIR /src
-COPY ["EventLite/EventLite.csproj", "EventLite/"]
-RUN dotnet restore "EventLite/EventLite.csproj"
+
 COPY . .
-WORKDIR "/src/EventLite"
-RUN dotnet build "EventLite.csproj" -c Release -o /app/build
+
+RUN dotnet restore EventCatalogApi.csproj
+
+
+RUN dotnet build EventCatalogApi.csproj -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "EventLite.csproj" -c Release -o /app/publish
+
+
+RUN dotnet publish EventCatalogApi.csproj -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "EventLite.dll"]
+ENTRYPOINT ["dotnet", "EventCatalogApi.dll"]
