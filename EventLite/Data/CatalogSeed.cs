@@ -57,6 +57,18 @@ namespace EventCatalogApi.Data
                     VenueStateProvince = "WA",
                     VenuePostalCode = "98101",
                     VenueMapUrl = "http://TODOREPLACEME/",
+
+                // TODO: Understand why this syntax works for Venue property vs.
+                // Hypothetical Venue2 field (see CatalogEvent)	
+                //Venue = new Venue	
+                //{	
+                //    Name = "Washington State Convention Center",	
+                //    AddressLine1 = "705 Pike St.",	
+                //    City = "Seattle",	
+                //    StateProvince = "WA",	
+                //    PostalCode = "98101",	
+                //    MapUrl = "http://TODOREPLACEME/"	
+                //},
                     HostOrganizer = "Fancy Food Company",
                     CatalogFormatId = 3,
                     CatalogTopicId = 3,
