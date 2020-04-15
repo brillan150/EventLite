@@ -82,7 +82,7 @@ namespace EventCatalogApi.Controllers
             [FromQuery]int pageSize = 2)
         {
             // TODO:
-            // Why coparing an int with a null nullable int doesn't
+            // Why comparing an int with a null nullable int doesn't
             // compiler error or crash...seems like should be type mismatch
             // or null exception
             // (No example of this remains, but I saw it happen!)
@@ -167,7 +167,6 @@ namespace EventCatalogApi.Controllers
             // written to the db if these commands are executed later?
 
             return Ok(viewModel);
-
         }
     }
 }
