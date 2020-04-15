@@ -69,57 +69,79 @@ namespace EventCatalogApi.Controllers
         //}
 
 
+
         [HttpGet()]
         [Route("[action]")]
         public async Task<IActionResult> Events(
             [FromQuery]int? catalogFormatId,
             [FromQuery]int? catalogTopicId,
+            [FromQuery]string earliestStart,
+            [FromQuery]string latestStart,
+            // [FromQuery]bool? hasFreeTicketType, <- Have to come back to this one after get TicketType in, or abort on it and go with simple pricing
             [FromQuery]int pageIndex = 0,
             [FromQuery]int pageSize = 2)
         {
+            // TODO:
+            // Why coparing an int with a null nullable int doesn't
+            // compiler error or crash...seems like should be type mismatch
+            // or null exception
+            // (No example of this remains, but I saw it happen!)
+
             var query = (IQueryable<CatalogEvent>)_context.CatalogEvents;
 
             if (catalogFormatId.HasValue)
             {
                 query = query.Where(e =>
-                e.CatalogFormatId == catalogFormatId.Value);
-
+                    e.CatalogFormatId == catalogFormatId.Value);
             }
 
             if (catalogTopicId.HasValue)
             {
                 query = query.Where(e =>
-                e.CatalogTopicId == catalogTopicId.Value);
-
+                    e.CatalogTopicId == catalogTopicId.Value);
             }
 
+            DateTime earliestStartDateTime;
+            if (DateTime.TryParse(earliestStart, out earliestStartDateTime))
+            // Ignore earliestStart parameter if cannot parse to DateTime
+            {
+                // If date but no time is specified, Parse() defaults
+                // appropriately to 12:00am
 
-            //filteredEventsQuery = _context.CatalogEvents.Where(e =>
-            //    e.CatalogTopicId == catalogTopicId.Value);
+                query = query.Where(e =>
+                    // Where event starts after earliest start time
+                    e.Start >= earliestStartDateTime);
+            }
 
+            DateTime latestStartDateTime;
+            if (DateTime.TryParse(latestStart, out latestStartDateTime))
+            // Ignore latestStart parameter if cannot parse to DateTime
+            {
+                // If paramter specifies date but not time,
+                var latestStartLower = latestStart.ToLower();
+                if (false == (latestStartLower.Contains(':') ||
+                                latestStartLower.Contains("am") ||
+                                latestStartLower.Contains("pm")))
+                {
+                    // Set to 11:59:59pm on that date
+                    latestStartDateTime = latestStartDateTime.AddHours(23).AddMinutes(59).AddSeconds(59);
+                }
 
-            // TODO:
-            // Why coparing an int with a null nullable int doesn't
-            // compiler error or crash...seems like should be type mismatch
-            // or null exception
-
-
-            // TODO!
-            // HANDLE NOT PUTTING PAST EVENTS ON TOP
+                query = query.Where(e =>
+                    // Where event starts before latest start time
+                    e.Start <= latestStartDateTime);
+            }
 
             var events = await query
-                .OrderBy(e => e.Start) // Soonest events first
+                .OrderBy(e => e.Start) // Soonest (or oldest past) events first
                 .Skip(pageSize * pageIndex)
                 .Take(pageSize)
                 .ToListAsync();
-
-
 
             events.ForEach(e =>
                 e.PictureUrl = e.PictureUrl.Replace(
                 "http://externalcatalogbaseurltobereplaced",
                 _config["ExternalCatalogBaseUrl"]));
-
 
             var viewModel = new PaginatedItemsViewModel<CatalogEvent>
             {
@@ -128,7 +150,6 @@ namespace EventCatalogApi.Controllers
                 ItemCount = await query.LongCountAsync(),
                 Data = events
             };
-
 
             // TODO:
             // help. how does this work?
@@ -145,12 +166,8 @@ namespace EventCatalogApi.Controllers
             // are we still at risk of having these changes inadvertently
             // written to the db if these commands are executed later?
 
-
-
             return Ok(viewModel);
 
         }
-
-
     }
 }
