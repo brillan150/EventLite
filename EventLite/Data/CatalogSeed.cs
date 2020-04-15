@@ -14,7 +14,7 @@ namespace EventCatalogApi.Data
             // Remember that you Migrate() a Database, not a context
             context.Database.Migrate();
 
-            if (false == context.CatalogFormats.Any())
+            if (!context.CatalogFormats.Any())
             {
                 context.CatalogFormats.AddRange( GetPreconfiguredCatalogFormats());
                 context.SaveChanges();
@@ -25,9 +25,8 @@ namespace EventCatalogApi.Data
                 context.CatalogTopics.AddRange(GetPreconfiguredCatalogTopics());
                 context.SaveChanges();
             }
-       
 
-            if (false == context.CatalogEvents.Any())
+            if (!context.CatalogEvents.Any())
             {
                 context.CatalogEvents.AddRange( GetPreconfiguredCatalogEvents() );
                 context.SaveChanges();
@@ -190,8 +189,8 @@ namespace EventCatalogApi.Data
             return new List<CatalogTopic>
             {
                 new CatalogTopic {Topic="Music"},
-                new CatalogTopic {Topic="Animals and pets"},
-                new CatalogTopic{Topic="Food and Drink"},
+                new CatalogTopic {Topic="Animals and Pets"},
+                new CatalogTopic {Topic="Food and Drink"},
             };
         }
 
