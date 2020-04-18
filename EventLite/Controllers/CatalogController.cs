@@ -195,13 +195,13 @@ namespace EventCatalogApi.Controllers
         [Route("[action]")]
         public async Task<IActionResult> RandomEvents(
             [FromQuery]int? itemCount = 6)
-            // TODO:
-            // FIX BUG WHERE THE CALLER CAN REQUEST MORE RANDOM EVENTS
-            // THAN TOTAL EVENTS IN THE CATALOG
-
             // 6 is expected based on current wireframe of our front-end
         {
             var totalEventsCount = await _context.CatalogEvents.LongCountAsync();
+
+            // If there are very many events, restict domain of the random sample
+            // to the first Int32.MaxValue events appearing in the db
+            var cappedEventsDomainCount = totalEventsCount <= Int32.MaxValue ? (int)totalEventsCount : Int32.MaxValue;
 
             var randomEvents = new List<CatalogEvent>();
             int validatedItemCount;
@@ -210,246 +210,252 @@ namespace EventCatalogApi.Controllers
             {
                 validatedItemCount = 0;
                 // Bad or trivial request
-                // Leave the list empty
+                // Leave the randomEvents empty
             }
-            else // Nontrivial request
+            else // requested one or more random events
             {
-                validatedItemCount = itemCount.Value;
 
-                // If there are very many events, restict domain of the random sample
-                // to the first Int32.MaxValue events
-                var cappedEventsDomainCount = totalEventsCount <= Int32.MaxValue ? (int)totalEventsCount : Int32.MaxValue;
-
-                // Zero-based indices (not one-based like the Ids/row nums in the db)
-                var randomIndices = ChooseUniqueRandomValuesInclusive(
-                                        validatedItemCount,
-                                        0,
-                                        cappedEventsDomainCount - 1,
-                                        randNumGen)
-                                     .ToList();
-
-                foreach (var index in randomIndices)
+                if (itemCount.Value >= cappedEventsDomainCount)
+                // caller requested all of the events (or more)
                 {
-                    var query = (IQueryable<CatalogEvent>)_context.CatalogEvents;
+                    validatedItemCount = cappedEventsDomainCount;
 
-                    query = query.Skip(index);
-                    var randomEvent = await query.FirstAsync();
-
-                    randomEvents.Add(randomEvent);
+                    // there is no random choosing to do
+                    randomEvents = await _context.CatalogEvents.ToListAsync();
                 }
+                else // Nontrivial request for a random subset of the events
+                {
+                    validatedItemCount = itemCount.Value;
 
-                
-                //var query2 = (IQueryable<CatalogEvent>)_context.CatalogEvents;
+                    // Zero-based indices
+                    var randomIndices = ChooseUniqueRandomValuesInclusive(
+                                            validatedItemCount,
+                                            0,
+                                            cappedEventsDomainCount - 1,
+                                            randNumGen)
+                                         .ToList();
 
-                //query2 = query2.Skip(2);
-                //var thirdEvent = await query2.FirstAsync();
+                    foreach (var index in randomIndices)
+                    {
+                        var query = (IQueryable<CatalogEvent>)_context.CatalogEvents;
 
-                //query2 = (IQueryable<CatalogEvent>)_context.CatalogEvents;
-                //query2 = query2.Skip(4);
-                //var fifthEvent = await query2.FirstAsync();
+                        query = query.Skip(index);
+                        var randomEvent = await query.FirstAsync();
 
-                //var eventList = new List<CatalogEvent>();
+                        randomEvents.Add(randomEvent);
+                    }
 
-                //eventList.Add(thirdEvent);
-                //eventList.Add(fifthEvent);
 
+                    //var query2 = (IQueryable<CatalogEvent>)_context.CatalogEvents;
 
+                    //query2 = query2.Skip(2);
+                    //var thirdEvent = await query2.FirstAsync();
 
+                    //query2 = (IQueryable<CatalogEvent>)_context.CatalogEvents;
+                    //query2 = query2.Skip(4);
+                    //var fifthEvent = await query2.FirstAsync();
 
-                //// Need indices in ascending order so we can set up the query
-                //// using Skip and Take/First
-                //randomIndices.Sort();
+                    //var eventList = new List<CatalogEvent>();
 
-                //var query = (IQueryable<CatalogEvent>)_context.CatalogEvents;
+                    //eventList.Add(thirdEvent);
+                    //eventList.Add(fifthEvent);
 
 
-                //// Set up for the query construction loop: do the initial skip-and-take
-                //// This is more intuitive than setting prevIndex to -1 to allow for doing
-                //// the first skip-and-take within the loop
-                //var randomIndicesEnumerator = randomIndices.GetEnumerator();
-                //// For some reason, a new enumerator doesn't point to the first object?
-                //randomIndicesEnumerator.MoveNext();
-                //var firstIndex = randomIndicesEnumerator.Current;
-                //query = query
-                //            .Skip(firstIndex)
-                //            // Can't use First() since it returns the object, not an IQueryable
-                //            .Take(1);
-                //// Note that we've validated that validatedItemCount >= 1, so this is safe
 
-                //if (randomIndices.Count > 1)
-                //{
-                //    var prevIndex = firstIndex;
-                //    while (randomIndicesEnumerator.MoveNext())
-                //    {
-                //        var currIndex = randomIndicesEnumerator.Current;
 
-                //        query = query
-                //                .Skip(currIndex - prevIndex - 1)
-                //                .Take(1);
-                        
-                //        // Update for next loop
-                //        prevIndex = currIndex;
-                //    }
-                //}
-                //// TODO:
-                //// Refactor all of this to avoid confusing use of "index" and "value" terms
+                    //// Need indices in ascending order so we can set up the query
+                    //// using Skip and Take/First
+                    //randomIndices.Sort();
 
+                    //var query = (IQueryable<CatalogEvent>)_context.CatalogEvents;
 
 
+                    //// Set up for the query construction loop: do the initial skip-and-take
+                    //// This is more intuitive than setting prevIndex to -1 to allow for doing
+                    //// the first skip-and-take within the loop
+                    //var randomIndicesEnumerator = randomIndices.GetEnumerator();
+                    //// For some reason, a new enumerator doesn't point to the first object?
+                    //randomIndicesEnumerator.MoveNext();
+                    //var firstIndex = randomIndicesEnumerator.Current;
+                    //query = query
+                    //            .Skip(firstIndex)
+                    //            // Can't use First() since it returns the object, not an IQueryable
+                    //            .Take(1);
+                    //// Note that we've validated that validatedItemCount >= 1, so this is safe
 
+                    //if (randomIndices.Count > 1)
+                    //{
+                    //    var prevIndex = firstIndex;
+                    //    while (randomIndicesEnumerator.MoveNext())
+                    //    {
+                    //        var currIndex = randomIndicesEnumerator.Current;
 
+                    //        query = query
+                    //                .Skip(currIndex - prevIndex - 1)
+                    //                .Take(1);
 
+                    //        // Update for next loop
+                    //        prevIndex = currIndex;
+                    //    }
+                    //}
+                    //// TODO:
+                    //// Refactor all of this to avoid confusing use of "index" and "value" terms
 
-                //BUG IS FIRST EVIDENT HERE...
-                //randomEvents = await query.ToListAsync();
-                // The skips and takes looked fine
-                // Why is ToListAsync giving an empty list?
 
 
 
-                // QUESTION:
-                // Is there a better way to construct this query than Skip and Take/First?
-                // I wanted to use ElementAt() and then join the resulting IQueryable collections
-                // but I can't seem to find a way to do that which doesn't create a new
-                // collection to be the joined result
-                // Is it true that, in terms of "modifying an IQueryable in-place,"
-                // you can only narrow/reduce/further refine a query, but you can't
-                // expand it, even if the objects that you want to expand it with
-                // came from the original collection?
-                // Waiiiit...ElementAt() returns an object not an IQueryable
-                // This would not have worked anyway.
 
 
 
+                    //BUG IS FIRST EVIDENT HERE...
+                    //randomEvents = await query.ToListAsync();
+                    // The skips and takes looked fine
+                    // Why is ToListAsync giving an empty list?
 
 
-                // NOW A BUNCH OF EXPERIMENTING TO TRY AND FIGURE OUT HOW
-                // ALL OF THIS WORKS:
 
-                //// What happens if we try to access the events from the db
-                //// one-at-a-time, each in their own query...does that even work?
-                //// can you use non-async linq query methods to query an EF db?
+                    // QUESTION:
+                    // Is there a better way to construct this query than Skip and Take/First?
+                    // I wanted to use ElementAt() and then join the resulting IQueryable collections
+                    // but I can't seem to find a way to do that which doesn't create a new
+                    // collection to be the joined result
+                    // Is it true that, in terms of "modifying an IQueryable in-place,"
+                    // you can only narrow/reduce/further refine a query, but you can't
+                    // expand it, even if the objects that you want to expand it with
+                    // came from the original collection?
+                    // Waiiiit...ElementAt() returns an object not an IQueryable
+                    // This would not have worked anyway.
 
-                //try
-                //{
-                //    var anEvent = _context.CatalogEvents.ElementAt(0);
 
-                //} catch (Exception e)
-                //{
-                //    // "Processing of the LINQ expression 'DbSet<CatalogEvent>\n    .ElementAt(__p_0)' by 'NavigationExpandingExpressionVisitor' failed. This may indicate either a bug or a limitation in EF Core. See https://go.microsoft.com/fwlink/?linkid=2101433 for more detailed information."
-                //}
 
 
 
+                    // NOW A BUNCH OF EXPERIMENTING TO TRY AND FIGURE OUT HOW
+                    // ALL OF THIS WORKS:
 
+                    //// What happens if we try to access the events from the db
+                    //// one-at-a-time, each in their own query...does that even work?
+                    //// can you use non-async linq query methods to query an EF db?
 
+                    //try
+                    //{
+                    //    var anEvent = _context.CatalogEvents.ElementAt(0);
 
+                    //} catch (Exception e)
+                    //{
+                    //    // "Processing of the LINQ expression 'DbSet<CatalogEvent>\n    .ElementAt(__p_0)' by 'NavigationExpandingExpressionVisitor' failed. This may indicate either a bug or a limitation in EF Core. See https://go.microsoft.com/fwlink/?linkid=2101433 for more detailed information."
+                    //}
 
-                //var newList = await _context.CatalogEvents.Skip(3).Take(1).ToListAsync();
-                // Can take
-                // Can skip, then take
-                // If skip, take, then skip again, THIS DOESN'T WORK
-                // Hrm...
-                // Need to skip what you just took?
-                // If take again after already took, has no effect.
-                // If skip after take, apparently destroys the query
-                // Ok, how is correct way to do this?
-                // It is true that we want to get all of these in a single query to the db, right?
 
 
 
 
 
-                //// EXPERIMENTS WITH DELETE/REMOVE...
-                //// To try and determine if an event's zero-based index will always be Id-1
 
+                    //var newList = await _context.CatalogEvents.Skip(3).Take(1).ToListAsync();
+                    // Can take
+                    // Can skip, then take
+                    // If skip, take, then skip again, THIS DOESN'T WORK
+                    // Hrm...
+                    // Need to skip what you just took?
+                    // If take again after already took, has no effect.
+                    // If skip after take, apparently destroys the query
+                    // Ok, how is correct way to do this?
+                    // It is true that we want to get all of these in a single query to the db, right?
 
-                //var listBeforeDelete = await _context.CatalogEvents.ToListAsync();
 
 
-                //// "The most effective way if you know ID and don't have entity loaded is to create fake entity and delete it"
-                //// https://stackoverflow.com/a/12831161
-                ////var catEventToDeleteById = new CatalogEvent { Id = 5 }; // Rhinos
-                //// But apparently we do have it loaded, as this call:
-                //// _context.CatalogEvents.Remove(catEventToDeleteById);
-                //// Throws InvalidOperationException:
-                //// "The instance of entity type 'CatalogEvent' cannot be tracked because another instance with the same key value for {'Id'} is already being tracked. When attaching existing entities, ensure that only one entity instance with a given key value is attached. Consider using 'DbContextOptionsBuilder.EnableSensitiveDataLogging' to see the conflicting key values."
 
-                ////var catEventToDelete = _context.CatalogEvents
 
+                    //// EXPERIMENTS WITH DELETE/REMOVE...
+                    //// To try and determine if an event's zero-based index will always be Id-1
 
-                ////_context.CatalogEvents.ExecuteSqlCommand();
-                //// By Executing SQL Query
-                //// https://www.c-sharpcorner.com/UploadFile/ff2f08/delete-an-object-without-retrieving-it-in-entity-framework-6/
 
+                    //var listBeforeDelete = await _context.CatalogEvents.ToListAsync();
 
-                ////var catEventToDeleteById = new CatalogEvent { Id = 5 }; // Rhinos
-                ////_context.Entry(catEventToDeleteById).State = EntityState.Deleted;
-                //// By Changing State
-                //// https://www.c-sharpcorner.com/UploadFile/ff2f08/delete-an-object-without-retrieving-it-in-entity-framework-6/
-                //// But doesn't work beacuse "tracked?"
 
+                    //// "The most effective way if you know ID and don't have entity loaded is to create fake entity and delete it"
+                    //// https://stackoverflow.com/a/12831161
+                    ////var catEventToDeleteById = new CatalogEvent { Id = 5 }; // Rhinos
+                    //// But apparently we do have it loaded, as this call:
+                    //// _context.CatalogEvents.Remove(catEventToDeleteById);
+                    //// Throws InvalidOperationException:
+                    //// "The instance of entity type 'CatalogEvent' cannot be tracked because another instance with the same key value for {'Id'} is already being tracked. When attaching existing entities, ensure that only one entity instance with a given key value is attached. Consider using 'DbContextOptionsBuilder.EnableSensitiveDataLogging' to see the conflicting key values."
 
-                //// Ok, fine.
-                //// Hit the db to get the event that we want to delete...
-                //// even though we already knew the Id of it *sigh*
-                //var catEventToBeDeleted = await _context.CatalogEvents.FindAsync(5);
+                    ////var catEventToDelete = _context.CatalogEvents
 
-                //_context.CatalogEvents.Remove(catEventToBeDeleted);
-                //_context.SaveChanges();
-                //// Oh! Do rememebr that we are changing the actual db here.
-                //// Changes to db persist on a run-to-run basis
-                //// What if clean and rebuild?
-                //// Do we get a clean, new db?
-                //// Yes, clean and rebuild gives a clean db and re-seeds it (for better or worse)
 
+                    ////_context.CatalogEvents.ExecuteSqlCommand();
+                    //// By Executing SQL Query
+                    //// https://www.c-sharpcorner.com/UploadFile/ff2f08/delete-an-object-without-retrieving-it-in-entity-framework-6/
 
-                //var listAfterDelete = await _context.CatalogEvents.ToListAsync();
 
-                //var nowWhatDoesFiveMean = await _context.CatalogEvents.FindAsync(5);
-                // Event with Id 6 moved into the rhino spot (fifth position)
-                // Event Ids do not change when an event is deleted
+                    ////var catEventToDeleteById = new CatalogEvent { Id = 5 }; // Rhinos
+                    ////_context.Entry(catEventToDeleteById).State = EntityState.Deleted;
+                    //// By Changing State
+                    //// https://www.c-sharpcorner.com/UploadFile/ff2f08/delete-an-object-without-retrieving-it-in-entity-framework-6/
+                    //// But doesn't work beacuse "tracked?"
 
-                // FindAsync(5) returns null when no event could be found that
-                // where Id == 5 (regardless of its current position/index in the db)
 
+                    //// Ok, fine.
+                    //// Hit the db to get the event that we want to delete...
+                    //// even though we already knew the Id of it *sigh*
+                    //var catEventToBeDeleted = await _context.CatalogEvents.FindAsync(5);
 
-                //REMAINING OPTIONS:
-                // OPTION A) Rethink Skip and Take:
-                // figure out how to use them with my zero - based db index approach
-                //   Even if the only way to do this would be to construct a new
-                //   query(and cause a separate db hit) to get each random event...
-                // would be curious to observe this working, even if only for learning
-                //  purposes, since all of the infrastructure is already in place.
-                // IF it works, it would likely be the quickest way to adapt what
-                //  I've already written to work
+                    //_context.CatalogEvents.Remove(catEventToBeDeleted);
+                    //_context.SaveChanges();
+                    //// Oh! Do rememebr that we are changing the actual db here.
+                    //// Changes to db persist on a run-to-run basis
+                    //// What if clean and rebuild?
+                    //// Do we get a clean, new db?
+                    //// Yes, clean and rebuild gives a clean db and re-seeds it (for better or worse)
 
-                // OPTION B) Re-purpose current randomly generated zero-based index collection
-                // as a "parallel" collection to "the collection of" event Ids in the db
-                // This is reminiscent of a common non-Fisher-Yates randomization alternative
-                // Query the db for a collection of all Ids
-                // Use the randomly generated zero-based index collection to choose
-                // Ids from the collection of all Ids, create a new collection of those
-                // chosen Ids
-                // Query the db again using the collection of chosen Ids to get
-                // the corresponding events
 
-                // OPTION C) Rework ChooseUniqueRandomValuesInclusive to take in an existing
-                // collection of values(rather than generating a sequence of adjacent values
-                // based on a min and a max)
-                // Query the db for a collection of all Ids to pass to the Choose method
-                // Query the db again using the collection of chosen Ids to get
-                // the corresponding events
+                    //var listAfterDelete = await _context.CatalogEvents.ToListAsync();
 
-                // BEFORE DECIDING WHICH OPTION TO DO...
-                // Do a proof-of-concept demo of constructing a query for events
-                // based on a collection of known Ids
-                // Can we achieve this using a single async db access?
-                // That is: "Get the events that match these Ids (the events corresponding
-                // to the Ids in this parameter collection?)
-                // Probably a lambda (maybe even nested ones?) in there somewhere?
+                    //var nowWhatDoesFiveMean = await _context.CatalogEvents.FindAsync(5);
+                    // Event with Id 6 moved into the rhino spot (fifth position)
+                    // Event Ids do not change when an event is deleted
 
+                    // FindAsync(5) returns null when no event could be found that
+                    // where Id == 5 (regardless of its current position/index in the db)
 
+
+                    //REMAINING OPTIONS:
+                    // OPTION A) Rethink Skip and Take:
+                    // figure out how to use them with my zero - based db index approach
+                    //   Even if the only way to do this would be to construct a new
+                    //   query(and cause a separate db hit) to get each random event...
+                    // would be curious to observe this working, even if only for learning
+                    //  purposes, since all of the infrastructure is already in place.
+                    // IF it works, it would likely be the quickest way to adapt what
+                    //  I've already written to work
+
+                    // OPTION B) Re-purpose current randomly generated zero-based index collection
+                    // as a "parallel" collection to "the collection of" event Ids in the db
+                    // This is reminiscent of a common non-Fisher-Yates randomization alternative
+                    // Query the db for a collection of all Ids
+                    // Use the randomly generated zero-based index collection to choose
+                    // Ids from the collection of all Ids, create a new collection of those
+                    // chosen Ids
+                    // Query the db again using the collection of chosen Ids to get
+                    // the corresponding events
+
+                    // OPTION C) Rework ChooseUniqueRandomValuesInclusive to take in an existing
+                    // collection of values(rather than generating a sequence of adjacent values
+                    // based on a min and a max)
+                    // Query the db for a collection of all Ids to pass to the Choose method
+                    // Query the db again using the collection of chosen Ids to get
+                    // the corresponding events
+
+                    // BEFORE DECIDING WHICH OPTION TO DO...
+                    // Do a proof-of-concept demo of constructing a query for events
+                    // based on a collection of known Ids
+                    // Can we achieve this using a single async db access?
+                    // That is: "Get the events that match these Ids (the events corresponding
+                    // to the Ids in this parameter collection?)
+                    // Probably a lambda (maybe even nested ones?) in there somewhere?
+                }
             }
 
 
@@ -461,6 +467,7 @@ namespace EventCatalogApi.Controllers
             {
                 RandomItemCount = validatedItemCount,
                 TotalItemCount = totalEventsCount,
+                CappedItemDomainCount = cappedEventsDomainCount,
                 Data = randomEvents
             };
 

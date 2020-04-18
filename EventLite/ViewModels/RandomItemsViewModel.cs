@@ -11,6 +11,8 @@ namespace EventCatalogApi.ViewModels
 
         public long TotalItemCount { get; set; }
 
+        public int CappedItemDomainCount { get; set; }
+
         public IEnumerable<T> Data { get; set; }
     }
 }
