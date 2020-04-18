@@ -222,7 +222,7 @@ namespace EventCatalogApi.Controllers
 
                 // Zero-based indicies (not one-based like the Ids/row nums in the db)
                 var randomIndicies = ChooseUniqueRandomValuesInclusive(
-                                        itemCount.Value,
+                                        validatedItemCount,
                                         0,
                                         cappedEventsDomainCount - 1,
                                         randNumGen)
@@ -233,6 +233,7 @@ namespace EventCatalogApi.Controllers
                 randomIndicies.Sort();
 
                 var query = (IQueryable<CatalogEvent>)_context.CatalogEvents;
+
 
                 // Set up for the query construction loop: do the initial skip-and-take
                 // This is more intuitive than setting prevIndex to -1 to allow for doing
