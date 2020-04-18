@@ -220,56 +220,88 @@ namespace EventCatalogApi.Controllers
                 // to the first Int32.MaxValue events
                 var cappedEventsDomainCount = totalEventsCount <= Int32.MaxValue ? (int)totalEventsCount : Int32.MaxValue;
 
-                // Zero-based indicies (not one-based like the Ids/row nums in the db)
-                var randomIndicies = ChooseUniqueRandomValuesInclusive(
+                // Zero-based indices (not one-based like the Ids/row nums in the db)
+                var randomIndices = ChooseUniqueRandomValuesInclusive(
                                         validatedItemCount,
                                         0,
                                         cappedEventsDomainCount - 1,
                                         randNumGen)
                                      .ToList();
 
-                // Need indicies in ascending order so we can set up the query
-                // using Skip and Take/First
-                randomIndicies.Sort();
-
-                var query = (IQueryable<CatalogEvent>)_context.CatalogEvents;
-
-
-                // Set up for the query construction loop: do the initial skip-and-take
-                // This is more intuitive than setting prevIndex to -1 to allow for doing
-                // the first skip-and-take within the loop
-                var randomIndiciesEnumerator = randomIndicies.GetEnumerator();
-                // For some reason, a new enumerator doesn't point to the first object?
-                randomIndiciesEnumerator.MoveNext();
-                var firstIndex = randomIndiciesEnumerator.Current;
-                query = query
-                            .Skip(firstIndex)
-                            // Can't use First() since it returns the object, not an IQueryable
-                            .Take(1);
-                // Note that we've validated that validatedItemCount >= 1, so this is safe
-
-                if (randomIndicies.Count > 1)
+                foreach (var index in randomIndices)
                 {
-                    var prevIndex = firstIndex;
-                    while (randomIndiciesEnumerator.MoveNext())
-                    {
-                        var currIndex = randomIndiciesEnumerator.Current;
+                    var query = (IQueryable<CatalogEvent>)_context.CatalogEvents;
 
-                        query = query
-                                .Skip(currIndex - prevIndex - 1)
-                                .Take(1);
-                        
-                        // Update for next loop
-                        prevIndex = currIndex;
-                    }
+                    query = query.Skip(index);
+                    var randomEvent = await query.FirstAsync();
+
+                    randomEvents.Add(randomEvent);
                 }
-                // TODO:
-                // Refactor all of this to avoid confusing use of "index" and "value" terms
+
+                
+                //var query2 = (IQueryable<CatalogEvent>)_context.CatalogEvents;
+
+                //query2 = query2.Skip(2);
+                //var thirdEvent = await query2.FirstAsync();
+
+                //query2 = (IQueryable<CatalogEvent>)_context.CatalogEvents;
+                //query2 = query2.Skip(4);
+                //var fifthEvent = await query2.FirstAsync();
+
+                //var eventList = new List<CatalogEvent>();
+
+                //eventList.Add(thirdEvent);
+                //eventList.Add(fifthEvent);
+
+
+
+
+                //// Need indices in ascending order so we can set up the query
+                //// using Skip and Take/First
+                //randomIndices.Sort();
+
+                //var query = (IQueryable<CatalogEvent>)_context.CatalogEvents;
+
+
+                //// Set up for the query construction loop: do the initial skip-and-take
+                //// This is more intuitive than setting prevIndex to -1 to allow for doing
+                //// the first skip-and-take within the loop
+                //var randomIndicesEnumerator = randomIndices.GetEnumerator();
+                //// For some reason, a new enumerator doesn't point to the first object?
+                //randomIndicesEnumerator.MoveNext();
+                //var firstIndex = randomIndicesEnumerator.Current;
+                //query = query
+                //            .Skip(firstIndex)
+                //            // Can't use First() since it returns the object, not an IQueryable
+                //            .Take(1);
+                //// Note that we've validated that validatedItemCount >= 1, so this is safe
+
+                //if (randomIndices.Count > 1)
+                //{
+                //    var prevIndex = firstIndex;
+                //    while (randomIndicesEnumerator.MoveNext())
+                //    {
+                //        var currIndex = randomIndicesEnumerator.Current;
+
+                //        query = query
+                //                .Skip(currIndex - prevIndex - 1)
+                //                .Take(1);
+                        
+                //        // Update for next loop
+                //        prevIndex = currIndex;
+                //    }
+                //}
+                //// TODO:
+                //// Refactor all of this to avoid confusing use of "index" and "value" terms
+
+
+
+
 
 
 
                 //BUG IS FIRST EVIDENT HERE...
-                randomEvents = await query.ToListAsync();
+                //randomEvents = await query.ToListAsync();
                 // The skips and takes looked fine
                 // Why is ToListAsync giving an empty list?
 
