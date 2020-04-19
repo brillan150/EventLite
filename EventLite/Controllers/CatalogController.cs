@@ -531,7 +531,7 @@ namespace EventCatalogApi.Controllers
 
             // Given an indexable collection of N objects (any type)
 
-            // Randomize these objects, in-place, in O(n) (constant time).
+            // Randomize these objects, in-place, in O(n) (linear time).
             // Use a method that ensures every possible permutation outcome is equally likely
             // (Assume that pseudorandom number generator supplies adequately
             // random values.)
