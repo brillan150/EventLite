@@ -214,6 +214,9 @@ namespace EventCatalogApi.Controllers
             }
             else // requested one or more random events
             {
+                // REFACTOR: THIS IS WHERE FILTERING BELONGS
+                // Leave count declarations up with other declarations
+                // set their values here
 
                 if (itemCount.Value >= cappedEventsDomainCount)
                 // caller requested all of the events (or more)

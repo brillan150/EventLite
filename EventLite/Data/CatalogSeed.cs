@@ -188,9 +188,9 @@ namespace EventCatalogApi.Data
         {
             return new List<CatalogTopic>
             {
-                new CatalogTopic {Topic="Music"},
-                new CatalogTopic {Topic="Animals and Pets"},
-                new CatalogTopic {Topic="Food and Drink"},
+                new CatalogTopic { Topic = "Music" },
+                new CatalogTopic { Topic = "Animals and Pets" },
+                new CatalogTopic { Topic = "Food and Drink" },
             };
         }
 
