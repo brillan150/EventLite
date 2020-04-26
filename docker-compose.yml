@@ -6,10 +6,10 @@ networks:
 
 services:
   eventcatalogapi:
-    image: event_catalogapi
     build:
       context: .\EventCatalogApi
       dockerfile: Dockerfile
+    image: event/catalogapi
     environment:
       DatabaseServer: mssqlserver
       DatabaseName: EventLiteCatalogDb
@@ -31,7 +31,22 @@ services:
       ACCEPT_EULA: Y
       SA_PASSWORD: ProductApi(!)
     ports:
-      - "1337:1433"
+      - "1440:1433"
     container_name: eventsqlserver
     networks:
       - backend
+
+  webmvc:
+    build:
+      context: .\WebMVC
+      dockerfile: Dockerfile
+    image: event/webmvc
+    environment:
+     EventCatalogApiUrl: http://eventcatalogapi
+    ports:
+     - "1337:80"
+    container_name: eventwebmvc
+    networks:
+      - frontend
+    depends_on:
+      - eventcatalogapi
