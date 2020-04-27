@@ -15,7 +15,7 @@ namespace WebMVC.Infrastructure
         }
 
         // async disallowed on interface method delcarations
-        // requie
+        // required here when awaiting an async method
 
         public async Task<string> HttpGetStringAsync(string uri, string authToken = null, string authMethod = "Bearer")
         {

@@ -5,8 +5,12 @@ using System.Threading.Tasks;
 
 namespace WebMVC.Services
 {
-    interface IEventCatalogApiService
+    public interface IEventCatalogApiService
     {
+        // See EventCatalogApiService file for notes
+        // Remember to put the method signatures here, too
+
+        
 
 
     }

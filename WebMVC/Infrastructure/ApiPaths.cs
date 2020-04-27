@@ -9,11 +9,15 @@ namespace WebMVC.Infrastructure
     {
         public static class Catalog
         {
+            // Brillan TODO:
             // GetEventsApiPath
 
             // GetFormatsApiPath
 
             // GetTopicsApiPath
+
+
+            // GetSingleEventApiPath
 
             // GetRandomEventsApiPath
 

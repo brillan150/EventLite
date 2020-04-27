@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WebMVC.Infrastructure
 {
-    interface IHttpClient
+    public interface IHttpClient
     {
         // Put, post and delete all return an HttpResponseMessage
         // Get only returns a string
