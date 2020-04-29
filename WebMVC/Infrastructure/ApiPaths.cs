@@ -18,6 +18,12 @@ namespace WebMVC.Infrastructure
 
 
             // GetSingleEventApiPath
+            public static string GetSingleEvent(string baseUri, int? id)
+            {
+                return $"{baseUri}singleevent/{id}";
+            }
+
+
 
             // GetRandomEventsApiPath
 
