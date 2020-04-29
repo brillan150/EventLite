@@ -89,8 +89,20 @@ namespace EventCatalogApi.Controllers
         //    return Ok( viewModel );
         //}
 
+        [HttpGet()]
+        [Route("[action]/{catalogEventId}")]
+        public async Task<IActionResult> SingleEvent(int? catalogEventid)
+        {
+            var events = _context.CatalogEvents;
+            
+            var single = await events
+                .Where(s => s.Id == catalogEventid)
+                .SingleAsync();
 
+            return Ok(single);
+        }
 
+        
         [HttpGet()]
         [Route("[action]")]
         public async Task<IActionResult> Events(
