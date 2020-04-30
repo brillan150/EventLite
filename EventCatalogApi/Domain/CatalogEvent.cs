@@ -62,25 +62,15 @@ namespace EventLite.Domain.EventLite
 
 
 
-        //public Venue Venue { get; set; }
+        //public CatalogVenue CatalogVenue { get; set; }
         // TODO: Figure out about init list syntax (see CatalogSeed)
-        //public Venue Venue2;
-        //public Venue Venue3 { get { return new Venue(); } set { } }
+        //public CatalogVenue Venue2;
+        //public CatalogVenue Venue3 { get { return new CatalogVenue(); } set { } }
 
         // "Fancy Food Company"
         public string HostOrganizer { get; set; }
 
-        // Total number of ticket sales allowed for this event
-        // across all types of tickets offered.
-        //public int TotalTicketLimitAllTypes { get; set; }
 
-        // Price, ticket limit and sales end date for each type of ticket offered
-        // for this event.
-        //public List<TicketType> TicketTypes { get; set; }
-        // QUESTION:
-        // In JewelsOnContainer, we didn't have a collection inside the 
-        // CatalogItems type. Is there anything we need to know about doing this?
-        // Either for the db and/or EntityFramework?
 
         // Foreign keys
         public int CatalogFormatId { get; set; }
@@ -89,5 +79,26 @@ namespace EventLite.Domain.EventLite
         // Navigational properties:
         public virtual CatalogFormat CatalogFormat { get; set; }
         public virtual CatalogTopic CatalogTopic { get; set; }
+
+
+
+        // Total number of ticket sales allowed for this event
+        // across all types of tickets offered.
+        public int TotalTicketLimitAllTypes { get; set; }
+
+
+        // SEE ALSO:
+        // CatalogTicketType
+        // Price, ticket limit and sales end date for each type of ticket offered
+        // for this event.
+
+        // Each CatalogEvent has one or more CatalogTicketType,
+        // essentially, a collection of CatalogTicketType
+        // Each CatalogTicketType is specified custom for each Event
+        // That is, each CatalogEvent has many CatalogTicketType
+        // Each CatalogTicketType has one CatalogEvent
+        // (TicketType that happen to be identical between different CatalogEvent
+        // are not associted in any way)
+
     }
 }

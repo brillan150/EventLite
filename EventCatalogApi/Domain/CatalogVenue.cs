@@ -6,10 +6,10 @@
 
 
     // Site design does not support looking up, sorting or filtering by venue,
-    // so Venue does not need to be a table in the db, right?
-    // Given that, does having a Venue class type cause any sort of issue with
+    // so CatalogVenue does not need to be a table in the db, right?
+    // Given that, does having a CatalogVenue class type cause any sort of issue with
     // EntityFramework, the db, or anything else?
-    public class Venue
+    public class CatalogVenue
     {
         public string Name { get; set; }
         public string AddressLine1 { get; set; }
@@ -20,7 +20,7 @@
         public string PostalCode { get; set; }
 
         public string MapUrl { get; set; }
-        // Should MapUrl be a property on the Venue type or not?
+        // Should MapUrl be a property on the CatalogVenue type or not?
         // it is assembled from the other properties at
         // some point. Whose job should this be?
         // My guess is that the CatalogController API method(s)

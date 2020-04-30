@@ -90,6 +90,38 @@ namespace EventCatalogApi.Controllers
         //}
 
 
+        [HttpGet]
+        [Route("[action]")]
+        public async Task<IActionResult> TicketTypes(
+            [FromQuery] int catalogEventId)
+        {
+            List<CatalogTicketType> ticketTypes = null;
+
+            if (catalogEventId > 0)
+            {
+                if (catalogEventId <= await _context.CatalogEvents.LongCountAsync())
+                {
+                    ticketTypes = await _context.CatalogTicketTypes
+                       .Where(tt => tt.CatalogEventId == catalogEventId)
+                       .ToListAsync();
+                }
+            }
+
+
+
+            var viewModel = new TicketTypesViewModel
+            {
+                CatalogEventId = catalogEventId,
+                CatalogTicketTypes = ticketTypes
+            };
+
+            return Ok(viewModel);
+        }
+
+
+
+
+
 
         [HttpGet()]
         [Route("[action]")]
@@ -98,10 +130,20 @@ namespace EventCatalogApi.Controllers
             [FromQuery]int? catalogTopicId,
             [FromQuery]string earliestStart,
             [FromQuery]string latestStart,
-            // [FromQuery]bool? hasFreeTicketType, <- Have to come back to this one after get TicketType in, or abort on it and go with simple pricing
+            [FromQuery]bool hasFreeTicketType = false,
             [FromQuery]int pageIndex = 0,
             [FromQuery]int pageSize = 2)
         {
+            var query = (IQueryable<CatalogEvent>)_context.CatalogEvents;
+
+            if (hasFreeTicketType)
+            {
+                query = query.Where(e =>
+                    _context.CatalogTicketTypes.Where(tt => tt.CatalogEventId == e.Id)
+                                                .Any(tt => tt.Price == 0.00M));
+            }
+
+
             // TODO:
             // Why comparing an int with a null nullable int doesn't
             // compiler error or crash...seems like should be type mismatch
@@ -111,8 +153,9 @@ namespace EventCatalogApi.Controllers
             // From helping Andrea figureout query execution command for SingleEvent endpoint
             //int id = 7;
             //var singleevent = await _context.CatalogEvents.Where(s => s.Id == id).SingleAsync();
-            
-            var query = (IQueryable<CatalogEvent>)_context.CatalogEvents;
+
+
+
 
             if (catalogFormatId.HasValue)
             {
@@ -156,6 +199,9 @@ namespace EventCatalogApi.Controllers
                     // Where event starts before latest start time
                     e.Start <= latestStartDateTime);
             }
+
+
+
 
             var events = await query
                 .OrderBy(e => e.Start) // Soonest (or oldest past) events first
@@ -632,10 +678,10 @@ namespace EventCatalogApi.Controllers
 //    Other?
 
 
-//TicketType table(as per convo with Ainur on Mon eve)
+//CatalogTicketType table(as per convo with Ainur on Mon eve)
 
 
 //Add functionality to existing Events API:
 //    For filter page:
-//Price filter<- Will have to come back to this one after get TicketType in, or abort on it and go with simple pricing
+//Price filter<- Will have to come back to this one after get CatalogTicketType in, or abort on it and go with simple pricing
 //    hasAFreeTicketType

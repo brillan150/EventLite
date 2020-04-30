@@ -21,6 +21,8 @@ namespace EventCatalogApi.Data
 
         public DbSet<CatalogTopic> CatalogTopics { get; set; }
 
+        public DbSet<CatalogTicketType> CatalogTicketTypes { get; set; }
+
 
 
         // TODO: Find out why OnModelCreating is protected (not public)
@@ -91,35 +93,35 @@ namespace EventCatalogApi.Data
 
 
 
-                    //entity.Property(e => e.Venue.Name)
+                    //entity.Property(e => e.CatalogVenue.Name)
                     //      .HasMaxLength(100)
                     //      .IsRequired();
-                    //entity.Property(e => e.Venue.AddressLine1)
+                    //entity.Property(e => e.CatalogVenue.AddressLine1)
                     //      .HasMaxLength(100)
                     //      .IsRequired();
-                    //entity.Property(e => e.Venue.AddressLine2)
+                    //entity.Property(e => e.CatalogVenue.AddressLine2)
                     //      .HasMaxLength(100);
-                    //entity.Property(e => e.Venue.AddressLine3)
+                    //entity.Property(e => e.CatalogVenue.AddressLine3)
                     //      .HasMaxLength(100);
-                    //entity.Property(e => e.Venue.City)
+                    //entity.Property(e => e.CatalogVenue.City)
                     //      .HasMaxLength(100)
                     //      .IsRequired();
-                    //entity.Property(e => e.Venue.StateProvince)
+                    //entity.Property(e => e.CatalogVenue.StateProvince)
                     //      .HasMaxLength(2)
                     //      .IsFixedLength()
                     //      .IsRequired();
-                    //entity.Property(e => e.Venue.PostalCode)
+                    //entity.Property(e => e.CatalogVenue.PostalCode)
                     //      .HasMaxLength(5)
                     //      .IsFixedLength()
                     //      .IsRequired();
-                    // The expression 'e => e.Venue.Name' is not a valid property expression. The expression should represent a simple property access: 't => t.MyProperty'. (Parameter 'propertyAccessExpression')
+                    // The expression 'e => e.CatalogVenue.Name' is not a valid property expression. The expression should represent a simple property access: 't => t.MyProperty'. (Parameter 'propertyAccessExpression')
 
 
 
-                    //entity.Property(e => e.Venue)
+                    //entity.Property(e => e.CatalogVenue)
                     //    .IsRequired()
                     //    .HasMaxLength(100);
-                    //The property 'CatalogEvent.Venue' is of type 'Venue' which is not supported by current database provider. Either change the property CLR type or ignore the property using the '[NotMapped]' attribute or by using 'EntityTypeBuilder.Ignore' in 'OnModelCreating'.
+                    //The property 'CatalogEvent.CatalogVenue' is of type 'CatalogVenue' which is not supported by current database provider. Either change the property CLR type or ignore the property using the '[NotMapped]' attribute or by using 'EntityTypeBuilder.Ignore' in 'OnModelCreating'.
 
 
                     entity.Property(e => e.HostOrganizer)
@@ -172,6 +174,30 @@ namespace EventCatalogApi.Data
                     .HasMaxLength(100);
 
 
+            });
+
+
+            modelBuilder.Entity<CatalogTicketType>(entity =>
+            {
+                entity.ToTable("CatalogTicketTypes");
+
+                entity.Property(tt => tt.Id)
+                    .IsRequired()
+                    .UseHiLo("catalog_ticket_types_hilo");
+
+                entity.Property(tt => tt.Name)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(tt => tt.Description)
+                    .HasMaxLength(1000);
+
+                entity.Property(tt => tt.Price)
+                    .IsRequired();
+
+                entity.HasOne(tt => tt.CatalogEvent)
+                    .WithMany()
+                    .HasForeignKey(tt => tt.CatalogEventId);
             });
         }
 

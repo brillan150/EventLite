@@ -62,5 +62,25 @@ namespace WebMVC.Models.Common
         public string CatalogTopic { get; set; }
 
 
+
+        // Total number of ticket sales allowed for this event
+        // across all types of tickets offered.
+        public int TotalTicketLimitAllTypes { get; set; }
+
+
+        // SEE ALSO:
+        // CatalogTicketType
+        // Price, ticket limit and sales end date for each type of ticket offered
+        // for this event.
+
+        // Each CatalogEvent has one or more CatalogTicketType,
+        // essentially, a collection of CatalogTicketType
+        // Each CatalogTicketType is specified custom for each Event
+        // That is, each CatalogEvent has many CatalogTicketType
+        // Each CatalogTicketType has one CatalogEvent
+        // (TicketType that happen to be identical between different CatalogEvent
+        // are not associted in any way)
+
+
     }
 }
