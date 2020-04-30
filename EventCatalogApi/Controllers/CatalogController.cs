@@ -134,16 +134,6 @@ namespace EventCatalogApi.Controllers
             [FromQuery]int pageIndex = 0,
             [FromQuery]int pageSize = 2)
         {
-            var query = (IQueryable<CatalogEvent>)_context.CatalogEvents;
-
-            if (hasFreeTicketType)
-            {
-                query = query.Where(e =>
-                    _context.CatalogTicketTypes.Where(tt => tt.CatalogEventId == e.Id)
-                                                .Any(tt => tt.Price == 0.00M));
-            }
-
-
             // TODO:
             // Why comparing an int with a null nullable int doesn't
             // compiler error or crash...seems like should be type mismatch
@@ -154,8 +144,58 @@ namespace EventCatalogApi.Controllers
             //int id = 7;
             //var singleevent = await _context.CatalogEvents.Where(s => s.Id == id).SingleAsync();
 
+            var query = GetFilteredEventsQuery(
+                catalogFormatId,
+                catalogTopicId,
+                earliestStart,
+                latestStart,
+                hasFreeTicketType);
 
+            var events = await query
+                .OrderBy(e => e.Start) // Soonest (or oldest past) events first
+                .Skip(pageSize * pageIndex)
+                .Take(pageSize)
+                .ToListAsync();
 
+            events.ForEach(e =>
+                e.PictureUrl = e.PictureUrl.Replace(
+                "http://externalcatalogbaseurltobereplaced",
+                _config["ExternalCatalogBaseUrl"]));
+
+            var viewModel = new PaginatedItemsViewModel<CatalogEvent>
+            {
+                PageIndex = pageIndex,
+                PageSize = pageSize,
+                ItemCount = await query.LongCountAsync(),
+                Data = events
+            };
+
+            // TODO:
+            // help. how does this work? (these two db commands commented out below)
+            // database caching??
+            // For the objects that the events and query collection have in common,
+            // they point to the same object in memory. Specifically, you can
+            // use the events reference to modify the in-memory object,
+            // then if you:
+            //_context.SaveChanges();
+            //_context.Database.Migrate();
+            // the replaced PictureUrls would get committed to the db
+            // What is the lifetime of edits to the in-memory db objects?
+            // If we don't save changes and update the db here (which we wouldn't)
+            // are we still at risk of having these changes inadvertently
+            // written to the db if these commands are executed later?
+
+            return Ok(viewModel);
+        }
+
+        private IQueryable<CatalogEvent> GetFilteredEventsQuery(
+            int? catalogFormatId,
+            int? catalogTopicId,
+            string earliestStart,
+            string latestStart,
+            bool hasFreeTicketType = false)
+        {
+            var query = (IQueryable<CatalogEvent>)_context.CatalogEvents;
 
             if (catalogFormatId.HasValue)
             {
@@ -200,61 +240,42 @@ namespace EventCatalogApi.Controllers
                     e.Start <= latestStartDateTime);
             }
 
-
-
-
-            var events = await query
-                .OrderBy(e => e.Start) // Soonest (or oldest past) events first
-                .Skip(pageSize * pageIndex)
-                .Take(pageSize)
-                .ToListAsync();
-
-            events.ForEach(e =>
-                e.PictureUrl = e.PictureUrl.Replace(
-                "http://externalcatalogbaseurltobereplaced",
-                _config["ExternalCatalogBaseUrl"]));
-
-            var viewModel = new PaginatedItemsViewModel<CatalogEvent>
+            if (hasFreeTicketType)
             {
-                PageIndex = pageIndex,
-                PageSize = pageSize,
-                ItemCount = await query.LongCountAsync(),
-                Data = events
-            };
+                query = query.Where(e =>
+                    _context.CatalogTicketTypes.Where(tt => tt.CatalogEventId == e.Id)
+                                                .Any(tt => tt.Price == 0.00M));
+            }
 
-            // TODO:
-            // help. how does this work? (these two db commands commented out below)
-            // database caching??
-            // For the objects that the events and query collection have in common,
-            // they point to the same object in memory. Specifically, you can
-            // use the events reference to modify the in-memory object,
-            // then if you:
-            //_context.SaveChanges();
-            //_context.Database.Migrate();
-            // the replaced PictureUrls would get committed to the db
-            // What is the lifetime of edits to the in-memory db objects?
-            // If we don't save changes and update the db here (which we wouldn't)
-            // are we still at risk of having these changes inadvertently
-            // written to the db if these commands are executed later?
-
-            return Ok(viewModel);
+            return query;
         }
-
 
         [HttpGet]
         [Route("[action]")]
         public async Task<IActionResult> RandomEvents(
+            [FromQuery]int? catalogFormatId,
+            [FromQuery]int? catalogTopicId,
+            [FromQuery]string earliestStart,
+            [FromQuery]string latestStart,
+            [FromQuery]bool hasFreeTicketType = false,
             [FromQuery]int itemCount = 6)
             // 6 is expected based on current wireframe of our front-end
         {
-            var totalEventsCount = await _context.CatalogEvents.LongCountAsync();
+            var randomEvents = new List<CatalogEvent>();
+            int validatedItemCount;
+
+            var query = GetFilteredEventsQuery(
+                catalogFormatId,
+                catalogTopicId,
+                earliestStart,
+                latestStart,
+                hasFreeTicketType);
+
+            var totalEventsCount = await query.LongCountAsync();
 
             // If there are very many events, restict domain of the random sample
             // to the first Int32.MaxValue events appearing in the db
             var cappedEventsDomainCount = totalEventsCount <= Int32.MaxValue ? (int)totalEventsCount : Int32.MaxValue;
-
-            var randomEvents = new List<CatalogEvent>();
-            int validatedItemCount;
 
             if (itemCount <= 0)
             {
@@ -264,17 +285,13 @@ namespace EventCatalogApi.Controllers
             }
             else // requested one or more random events
             {
-                // REFACTOR: THIS IS WHERE FILTERING BELONGS
-                // Leave count declarations up with other declarations
-                // set their values here
-
                 if (itemCount >= cappedEventsDomainCount)
                 // caller requested all of the events (or more)
                 {
                     validatedItemCount = cappedEventsDomainCount;
 
                     // there is no random choosing to do
-                    randomEvents = await _context.CatalogEvents.ToListAsync();
+                    randomEvents = await query.ToListAsync();
                 }
                 else // Nontrivial request for a random subset of the events
                 {
@@ -290,8 +307,6 @@ namespace EventCatalogApi.Controllers
 
                     foreach (var index in randomIndices)
                     {
-                        var query = (IQueryable<CatalogEvent>)_context.CatalogEvents;
-
                         query = query.Skip(index);
                         var randomEvent = await query.FirstAsync();
 
@@ -510,8 +525,6 @@ namespace EventCatalogApi.Controllers
                     // Probably a lambda (maybe even nested ones?) in there somewhere?
                 }
             }
-
-
 
             // Construct a ViewModel object to send back over the wire
             // Remember that this will be deserialized into an object on the other end
