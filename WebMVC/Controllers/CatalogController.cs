@@ -17,9 +17,11 @@ namespace WebMVC.Controllers
         }
 
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index(int? id)
         {
-            return View();
+            var test = await _service.GetSingleEventAsync(id);
+
+            return View(test);
         }
     }
 }
