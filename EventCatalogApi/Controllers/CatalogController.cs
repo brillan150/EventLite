@@ -108,6 +108,10 @@ namespace EventCatalogApi.Controllers
             // or null exception
             // (No example of this remains, but I saw it happen!)
 
+            // From helping Andrea figureout query execution command for SingleEvent endpoint
+            //int id = 7;
+            //var singleevent = await _context.CatalogEvents.Where(s => s.Id == id).SingleAsync();
+            
             var query = (IQueryable<CatalogEvent>)_context.CatalogEvents;
 
             if (catalogFormatId.HasValue)
@@ -194,7 +198,7 @@ namespace EventCatalogApi.Controllers
         [HttpGet]
         [Route("[action]")]
         public async Task<IActionResult> RandomEvents(
-            [FromQuery]int? itemCount = 6)
+            [FromQuery]int itemCount = 6)
             // 6 is expected based on current wireframe of our front-end
         {
             var totalEventsCount = await _context.CatalogEvents.LongCountAsync();
@@ -206,7 +210,7 @@ namespace EventCatalogApi.Controllers
             var randomEvents = new List<CatalogEvent>();
             int validatedItemCount;
 
-            if (itemCount.Value <= 0)
+            if (itemCount <= 0)
             {
                 validatedItemCount = 0;
                 // Bad or trivial request
@@ -218,7 +222,7 @@ namespace EventCatalogApi.Controllers
                 // Leave count declarations up with other declarations
                 // set their values here
 
-                if (itemCount.Value >= cappedEventsDomainCount)
+                if (itemCount >= cappedEventsDomainCount)
                 // caller requested all of the events (or more)
                 {
                     validatedItemCount = cappedEventsDomainCount;
@@ -228,7 +232,7 @@ namespace EventCatalogApi.Controllers
                 }
                 else // Nontrivial request for a random subset of the events
                 {
-                    validatedItemCount = itemCount.Value;
+                    validatedItemCount = itemCount;
 
                     // Zero-based indices
                     var randomIndices = ChooseUniqueRandomValuesInclusive(

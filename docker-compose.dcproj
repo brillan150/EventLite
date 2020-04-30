@@ -5,7 +5,7 @@
     <DockerTargetOS>Linux</DockerTargetOS>
     <ProjectGuid>0ef9726f-2531-4008-b9e0-8ca023ae9dde</ProjectGuid>
     <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
-    <DockerServiceUrl>{Scheme}://localhost:{ServicePort}/</DockerServiceUrl>
+    <DockerServiceUrl>{Scheme}://localhost:{ServicePort}/Filter</DockerServiceUrl>
     <DockerServiceName>webmvc</DockerServiceName>
   </PropertyGroup>
   <ItemGroup>

@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using WebMVC.Infrastructure;
+using WebMVC.Services;
 
 namespace WebMVC
 {
@@ -28,6 +29,10 @@ namespace WebMVC
 
             // Dependency Injection
             services.AddSingleton<IHttpClient, CustomHttpClient>();
+
+            // QUESTION: WHY DOES EVERYONE NEED THEIR OWN CATALOGSERVICE?
+            // Seems like all of the controllers should be able to share one, right?
+            services.AddTransient<IEventCatalogApiService, EventCatalogApiService>();
 
         }
 
