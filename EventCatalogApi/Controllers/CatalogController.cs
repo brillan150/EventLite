@@ -144,20 +144,20 @@ namespace EventCatalogApi.Controllers
             //int id = 7;
             //var singleevent = await _context.CatalogEvents.Where(s => s.Id == id).SingleAsync();
 
-            var query = GetFilteredEventsQuery(
+            var filteredEvents = GetFilteredEventsQuery(
                 catalogFormatId,
                 catalogTopicId,
                 earliestStart,
                 latestStart,
                 hasFreeTicketType);
 
-            var events = await query
+            var pageOfEvents = await filteredEvents
                 .OrderBy(e => e.Start) // Soonest (or oldest past) events first
                 .Skip(pageSize * pageIndex)
                 .Take(pageSize)
                 .ToListAsync();
 
-            events.ForEach(e =>
+            pageOfEvents.ForEach(e =>
                 e.PictureUrl = e.PictureUrl.Replace(
                 "http://externalcatalogbaseurltobereplaced",
                 _config["ExternalCatalogBaseUrl"]));
@@ -166,8 +166,8 @@ namespace EventCatalogApi.Controllers
             {
                 PageIndex = pageIndex,
                 PageSize = pageSize,
-                ItemCount = await query.LongCountAsync(),
-                Data = events
+                ItemCount = await filteredEvents.LongCountAsync(),
+                Data = pageOfEvents
             };
 
             // TODO:
@@ -264,14 +264,14 @@ namespace EventCatalogApi.Controllers
             var randomEvents = new List<CatalogEvent>();
             int validatedItemCount;
 
-            var query = GetFilteredEventsQuery(
+            var filteredEvents = GetFilteredEventsQuery(
                 catalogFormatId,
                 catalogTopicId,
                 earliestStart,
                 latestStart,
                 hasFreeTicketType);
 
-            var totalEventsCount = await query.LongCountAsync();
+            var totalEventsCount = await filteredEvents.LongCountAsync();
 
             // If there are very many events, restict domain of the random sample
             // to the first Int32.MaxValue events appearing in the db
@@ -291,7 +291,7 @@ namespace EventCatalogApi.Controllers
                     validatedItemCount = cappedEventsDomainCount;
 
                     // there is no random choosing to do
-                    randomEvents = await query.ToListAsync();
+                    randomEvents = await filteredEvents.ToListAsync();
                 }
                 else // Nontrivial request for a random subset of the events
                 {
@@ -305,9 +305,10 @@ namespace EventCatalogApi.Controllers
                                             randNumGen)
                                          .ToList();
 
+
                     foreach (var index in randomIndices)
                     {
-                        query = query.Skip(index);
+                        var query = filteredEvents.Skip(index);
                         var randomEvent = await query.FirstAsync();
 
                         randomEvents.Add(randomEvent);
