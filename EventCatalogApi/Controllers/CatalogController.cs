@@ -306,6 +306,10 @@ namespace EventCatalogApi.Controllers
                                          .ToList();
 
 
+
+
+                    // Source code for EF Core 3.1.0:
+                    // https://github.com/dotnet/efcore/tree/v3.1.0/src
                     foreach (var index in randomIndices)
                     {
                         var query = filteredEvents.Skip(index);
