@@ -157,10 +157,7 @@ namespace EventCatalogApi.Controllers
                 .Take(pageSize)
                 .ToListAsync();
 
-            pageOfEvents.ForEach(e =>
-                e.PictureUrl = e.PictureUrl.Replace(
-                "http://externalcatalogbaseurltobereplaced",
-                _config["ExternalCatalogBaseUrl"]));
+            ReplacePictureUrlPlaceholdersWithExternalCatalogBaseUrl(pageOfEvents);
 
             var viewModel = new PaginatedItemsViewModel<CatalogEvent>
             {
@@ -187,6 +184,15 @@ namespace EventCatalogApi.Controllers
 
             return Ok(viewModel);
         }
+
+        // Arrow notation for method definition (like a lambda but not)
+        private void ReplacePictureUrlPlaceholdersWithExternalCatalogBaseUrl(
+            List<CatalogEvent> events) =>
+                events.ForEach(e =>
+                    e.PictureUrl = e.PictureUrl.Replace(
+                        "http://externalcatalogbaseurltobereplaced",
+                        _config["ExternalCatalogBaseUrl"]));
+
 
         private IQueryable<CatalogEvent> GetFilteredEventsQuery(
             int? catalogFormatId,
@@ -317,6 +323,8 @@ namespace EventCatalogApi.Controllers
 
                         randomEvents.Add(randomEvent);
                     }
+
+                    ReplacePictureUrlPlaceholdersWithExternalCatalogBaseUrl(randomEvents);
 
 
                     //var query2 = (IQueryable<CatalogEvent>)_context.CatalogEvents;
