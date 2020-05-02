@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using WebMVC.Infrastructure;
+using WebMVC.Services;
 
 namespace WebMVC
 {
@@ -28,6 +29,8 @@ namespace WebMVC
 
             // Dependency Injection
             services.AddSingleton<IHttpClient, CustomHttpClient>();
+
+            services.AddTransient<IEventCatalogApiService, EventCatalogApiService>();
 
         }
 
