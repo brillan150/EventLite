@@ -43,6 +43,7 @@ services:
     image: event/webmvc
     environment:
      EventCatalogApiUrl: http://eventcatalogapi
+     ASPNETCORE_ENVIRONMENT: Development
     ports:
      - "1337:80"
     container_name: eventwebmvc

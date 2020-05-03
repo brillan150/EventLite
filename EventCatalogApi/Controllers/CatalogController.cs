@@ -89,6 +89,20 @@ namespace EventCatalogApi.Controllers
         //    return Ok( viewModel );
         //}
 
+        [HttpGet()]
+        [Route("[action]/{catalogEventId}")]
+        public async Task<IActionResult> SingleEvent(int? catalogEventid)
+        {
+            var events =  _context.CatalogEvents;
+
+            var single = await events
+                .Where(s => s.Id == catalogEventid)
+                .SingleAsync();
+
+            single.PictureUrl = single.PictureUrl.Replace("http://externalcatalogbaseurltobereplaced", _config["ExternalCatalogBaseUrl"]);
+
+            return Ok(single);
+        }
 
         [HttpGet]
         [Route("[action]")]

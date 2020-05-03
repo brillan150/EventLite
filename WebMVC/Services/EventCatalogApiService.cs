@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using WebMVC.Infrastructure;
 using WebMVC.Models;
+using WebMVC.Models.Common;
 using WebMVC.Models.FilterModels;
 
 namespace WebMVC.Services
@@ -20,6 +21,13 @@ namespace WebMVC.Services
         {
             _baseUrl = $"{ config["EventCatalogApiUrl"]}/api/catalog/";
             _client = client;
+        }
+
+        public async Task<CatalogEvent> GetSingleEventAsync(int? id)
+        {
+            var singleEventUri = ApiPaths.Catalog.GetSingleEvent(_baseUrl, id);
+            var eventstring = await _client.HttpGetStringAsync(singleEventUri);
+            return JsonConvert.DeserializeObject<CatalogEvent>(eventstring);
         }
 
         // Brillan TODO:
