@@ -15,11 +15,20 @@ namespace WebMVC.Infrastructure
             // GetFormatsApiPath
 
             // GetTopicsApiPath
-
+            public static string GetAllTopics(string baseUri)
+            {
+                return $"{baseUri}catalogtopics";
+            }
 
             // GetSingleEventApiPath
 
             // GetRandomEventsApiPath
+            public static string GetRandomEventsApiPath(string baseUri)
+            {
+                return $"{baseUri}randomevents";
+            }
+
+
 
             // ...more?
 
