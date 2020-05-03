@@ -1,8 +1,13 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WebMVC.Infrastructure;
+using WebMVC.Models;
+using WebMVC.Models.Common;
 using WebMVC.Models.FilterModels;
 
 namespace WebMVC.Services
@@ -10,11 +15,19 @@ namespace WebMVC.Services
     public class EventCatalogApiService : IEventCatalogApiService
     {
         private readonly IHttpClient _client;
+        private readonly string _baseUrl;
 
-        public EventCatalogApiService(IHttpClient client)
+        public EventCatalogApiService(IConfiguration config, IHttpClient client)
         {
-
+            _baseUrl = $"{ config["EventCatalogApiUrl"]}/api/catalog/";
             _client = client;
+        }
+
+        public async Task<CatalogEvent> GetSingleEventAsync(int? id)
+        {
+            var singleEventUri = ApiPaths.Catalog.GetSingleEvent(_baseUrl, id);
+            var eventstring = await _client.HttpGetStringAsync(singleEventUri);
+            return JsonConvert.DeserializeObject<CatalogEvent>(eventstring);
         }
 
         // Brillan TODO:
@@ -43,7 +56,21 @@ namespace WebMVC.Services
             // TODO
             return new EventCatalog();
         }
+        public async Task<RandomEvents> GetRandomItemsAsync()
+        {
+            var randomEventsUri = ApiPaths.Catalog.GetRandomEventsApiPath(_baseUrl);
+            var dataString = await _client.HttpGetStringAsync(randomEventsUri);
+            return JsonConvert.DeserializeObject<RandomEvents>(dataString);
 
+
+
+
+        }
+
+        public Task<IEnumerable<SelectListItem>> GetTopicsAsync()
+        {
+            throw new NotImplementedException();
+        }
 
 
         // GetFormatsAsync

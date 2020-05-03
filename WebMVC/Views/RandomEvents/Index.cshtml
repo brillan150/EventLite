@@ -1,0 +1,24 @@
+﻿@model WebMVC.Models.RandomEvents
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+
+
+
+<div id="catalog-event-row" class="container">
+    <div class="esh-catalog-items row">
+        @foreach (var catalogItem in Model.Data)
+        {
+            <div class="esh-catalog-item col-md-4">
+                @Html.Partial("_product1", catalogItem)
+            </div>
+        }
+    </div>
+
+
+
+</div>
