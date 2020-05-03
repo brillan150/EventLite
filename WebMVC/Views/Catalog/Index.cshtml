@@ -1,0 +1,125 @@
+﻿ @model WebMVC.Models.CatalogEvent
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>EventLite </h1>
+
+<div id="EventTitle" class="row"> 
+    <div class="col-sm-1">
+        <img alt="Single Event" src="" class="img-fluid rounded"/>
+    </div>
+
+<div>
+    <h4>CatalogEvent</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Id)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Id)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Title)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Title)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Description)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Description)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Start)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Start)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.End)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.End)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.PictureUrl)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.PictureUrl)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.VenueName)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.VenueName)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.VenueAddressLine1)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.VenueAddressLine1)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.VenueAddressLine2)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.VenueAddressLine2)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.VenueAddressLine3)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.VenueAddressLine3)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.VenueCity)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.VenueCity)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.VenueStateProvince)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.VenueStateProvince)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.VenuePostalCode)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.VenuePostalCode)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.VenueMapUrl)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.VenueMapUrl)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.HostOrganizer)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.HostOrganizer)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.CatalogFormatId)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.CatalogFormatId)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.CatalogTopicId)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.CatalogTopicId)
+        </dd>
+    </dl>
+</div>
+<div>
+    @Html.ActionLink("Edit", "Edit", new { /* id = Model.PrimaryKey */ }) |
+    <a asp-action="Index">Back to List</a>
+</div>

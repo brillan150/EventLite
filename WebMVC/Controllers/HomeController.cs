@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using WebMVC.Models;
+using WebMVC.Services;
 
 namespace WebMVC.Controllers
 {
@@ -13,7 +14,7 @@ namespace WebMVC.Controllers
     {
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, IEventCatalogApiService service)
         {
             _logger = logger;
         }

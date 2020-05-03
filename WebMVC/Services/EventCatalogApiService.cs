@@ -16,7 +16,7 @@ namespace WebMVC.Services
 
         public EventCatalogApiService(IConfiguration config, IHttpClient client)
         {
-            _baseUri = $"{config["CatalogUrl"]}/api/catalog/";
+            _baseUri = $"{config["EventCatalogApiUrl"]}/api/catalog/";
             _client = client;
         }
 
