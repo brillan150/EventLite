@@ -57,7 +57,7 @@ namespace WebMVC
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller=RandomEvents}/{action=Index}/{id?}");
             });
         }
     }

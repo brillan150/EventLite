@@ -8,27 +8,26 @@
     <link rel="stylesheet" href="~/css/site.css" />
 </head>
 <body>
-    <header class="navbar navbar-light navbar-static-top">
-        <div class="container">
-            <article class="row">
-                <section class="col-lg-7 col-md-6 col-xs-12">
-                    <a class="navbar-brand" routerLink="catalog">
-                        <a asp-area="" asp-controller="Catalog" asp-action="Index">
-                            <img height="80" width="100" src="~/images/Logo-4.png" />
-                        </a>
-                    </a>
-                </section>
-                @*@await Html.PartialAsync("_LoginPartial")*@
-            </article>
-            <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav">
-
-                    <li><a asp-area="" asp-controller="Catalog" asp-action="About">About</a></li>
-
-                </ul>
-
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container">
+                <a class="navbar-brand" asp-area="" asp-controller="RandomEvents" asp-action="Index">EventLite</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="RandomEvents" asp-action="Index">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="RandomEvents" asp-action="Privacy">Privacy</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
-        </div>
+        </nav>
     </header>
     <div class="container">
         <main role="main" class="pb-3">
@@ -38,7 +37,7 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2020 - EventLite - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2020 - EventLite - <a asp-area="" asp-controller="randomevents" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

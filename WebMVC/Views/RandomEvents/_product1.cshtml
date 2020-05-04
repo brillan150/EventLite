@@ -5,10 +5,12 @@
     ViewData["Title"] = "Index";
 }
 
+  
+    <form asp-controller="Catalog" asp-action="Index" method="get" asp-route-id="@Model.Id">
+        <input class="esh-catalog-send" type="image" height="200" width="250" src="@Model.PictureUrl" />
+    </form>
 
 <form asp-controller="Cart" asp-action="AddToCart" id="eventBoxStyling">
-
-    <img class="esh-catalog-thumbnail" height="200" width="250" src="@Model.PictureUrl" />
     <input class="esh-catalog-button" type="submit" value="[ ADD TO CART ]" />
     <div class="esh-catalog-topic">
         <span>@Model.CatalogTopic</span>
@@ -26,3 +28,4 @@
         <input type="hidden" asp-for="@Model.PictureUrl" name="pictureUrl" />
         <input type="hidden" asp-for="@Model.Price" name="price" />*@
 </form>
+
