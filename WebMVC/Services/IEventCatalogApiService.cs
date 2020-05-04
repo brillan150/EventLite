@@ -20,7 +20,7 @@ namespace WebMVC.Services
             int? pageIndex,
             int? pageSize);
 
-        Task<RandomEvents> GetRandomItemsAsync();
+        Task<RandomEvents> GetRandomEventsAsync(int? topicFilterApplied);
 
         Task<IEnumerable<SelectListItem>> GetTopicsAsync();
 

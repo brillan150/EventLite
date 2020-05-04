@@ -8,7 +8,7 @@ namespace WebMVC.Models
 {
     public class RandomEvents
     {
-
+        
         public int RandomItemCount { get; set; }
 
         // public long TotalItemCount { get; set; }
@@ -18,4 +18,11 @@ namespace WebMVC.Models
         public List<CatalogEvent> Data { get; set; }
 
     }
+
+
+    //var result = new RandomEvents();
+    //Console.WriteLine( result.Data[0].Title );
+
+    
+
 }

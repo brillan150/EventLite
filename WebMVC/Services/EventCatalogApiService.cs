@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,7 +57,7 @@ namespace WebMVC.Services
             // TODO
             return new EventCatalog();
         }
-        public async Task<RandomEvents> GetRandomItemsAsync()
+        public async Task<RandomEvents> GetRandomEventsAsync(int? topicFilterApplied)
         {
             var randomEventsUri = ApiPaths.Catalog.GetRandomEventsApiPath(_baseUrl);
             var dataString = await _client.HttpGetStringAsync(randomEventsUri);
@@ -71,6 +72,34 @@ namespace WebMVC.Services
         {
             throw new NotImplementedException();
         }
+
+
+        //public async Task<IEnumerable<SelectListItem>> GetTopicsAsync()
+        //{
+        //    var topicUrl = ApiPaths.Catalog.GetAllTopics(_baseUrl, catalogTopicId);
+        //    var dataString = await _client.HttpGetStringAsync(topicUrl);
+        //    var items = new List<SelectListItem>
+        //    {
+        //        new SelectListItem
+        //        {
+        //            Value=null,
+        //            Text="All",
+        //            Selected=true
+        //        }
+        //    };
+        //    var topics = JArray.Parse(dataString);
+        //    foreach(var topic in topics)
+        //    {
+        //        items.Add(
+        //            new SelectListItem
+        //            {
+        //                Value = topic.Value<string>("id")
+        //                Text = topic.Value<string>("topic")
+        //            }
+        //            );
+        //        return items;
+        //    }
+        //}
 
 
         // GetFormatsAsync

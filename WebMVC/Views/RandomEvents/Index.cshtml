@@ -1,17 +1,21 @@
-﻿@model WebMVC.Models.RandomEvents
+﻿@model WebMVC.ViewModels.RandomEventsPageViewModel
 
 @{
     ViewData["Title"] = "Index";
+    @*@model WebMVC.ViewModels.RandomEventsPageViewModel*@
 }
 
-<h1>Index</h1>
 
 
 
+@Html.Partial("_header", Model.HeaderEvent)
+<br />
+<br />
+<br />
 
 <div id="catalog-event-row" class="container">
     <div class="esh-catalog-items row">
-        @foreach (var catalogItem in Model.Data)
+        @foreach (var catalogItem in Model.CatalogEvents)
         {
             <div class="esh-catalog-item col-md-4">
                 @Html.Partial("_product1", catalogItem)
@@ -22,3 +26,78 @@
 
 
 </div>
+
+@*<div id="tab">
+    <button class="tablink" onclick="openPage('Home', this, 'red')">Home</button>
+    <button class="tablink" onclick="openPage('News', this, 'green')" id="defaultOpen">Music</button>
+    <button class="tablink" onclick="openPage('Contact', this, 'blue')">Food</button>
+    <button class="tablink" onclick="openPage('About', this, 'orange')">Tech</button>
+
+    <div id="Home" class="tabcontent">
+        <div id="catalog-event-row" class="container">
+            <div class="esh-catalog-items row">
+                @foreach (var catalogItem in Model.CatalogEvents)
+                {
+                    <div class="esh-catalog-item col-md-4">
+                        @Html.Partial("_product1", catalogItem)
+                    </div>
+                }
+            </div>
+
+
+
+        </div>
+    </div>
+
+    <div id="Music" class="tabcontent">
+
+    </div>
+
+    <div id="Food" class="tabcontent">
+        <h3>Food</h3>
+        <p>Get in touch, or swing by for a cup of coffee.</p>
+    </div>
+
+    <div id="Tech" class="tabcontent">
+        <h3>Tech</h3>
+        <p>Who we are and what we do.</p>
+    </div>
+</div>
+
+<script>
+    function openPage(pageName, elmnt, color) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablink");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].style.backgroundColor = "";
+        }
+        document.getElementById(pageName).style.display = "block";
+        elmnt.style.backgroundColor = color;
+    }
+
+    // Get the element with id="defaultOpen" and click on it
+    document.getElementById("defaultOpen").click();
+</script>
+
+
+<br />
+<br />*@
+
+
+
+
+@*<section class="esh-catalog-filters">
+        <div class="container">
+            <form asp-action="Index" asp-controller="Catalog" method="post">
+                <label class="esh-catalog-label" data-title="brand">
+                    <select asp-for="@Model.TopicFilterApplied" asp-items="@Model.Topic" class="esh-catalog-filter"></select>
+                </label>
+
+                <input class="esh-catalog-send" type="image" src="~/images/arrow-right.svg" />
+            </form>
+        </div>
+    </section>*@

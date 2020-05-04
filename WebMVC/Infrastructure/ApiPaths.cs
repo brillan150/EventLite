@@ -15,9 +15,9 @@ namespace WebMVC.Infrastructure
             // GetFormatsApiPath
 
             // GetTopicsApiPath
-            public static string GetAllTopics(string baseUri)
+            public static string GetAllTopics(string baseUri, int? catalogTopicId)
             {
-                return $"{baseUri}catalogtopics";
+                return $"{baseUri}randomevents?catalogtopics={catalogTopicId}";
             }
 
             // GetSingleEventApiPath
