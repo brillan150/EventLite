@@ -59,13 +59,22 @@ namespace WebMVC.Services
         }
         public async Task<RandomEvents> GetRandomEventsAsync(int? topicFilterApplied)
         {
+
+            var generalTest = ApiPaths.Catalog.GetEventsApiPath_StringBuilderVer(
+                _baseUrl, 3, 3, null, null, false, 0, 3);
+
+            var questionMarkRemovalTest = ApiPaths.Catalog.GetEventsApiPath_StringBuilderVer(
+                _baseUrl, null, null, null, null, null, null, null);
+
+            var ampersandRemovalTest = ApiPaths.Catalog.GetEventsApiPath_StringBuilderVer(
+                _baseUrl, null, 3, null, null, false, 0, 3);
+
+
+
+
             var randomEventsUri = ApiPaths.Catalog.GetRandomEventsApiPath(_baseUrl);
             var dataString = await _client.HttpGetStringAsync(randomEventsUri);
             return JsonConvert.DeserializeObject<RandomEvents>(dataString);
-
-
-
-
         }
 
         public Task<IEnumerable<SelectListItem>> GetTopicsAsync()
