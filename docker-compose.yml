@@ -5,42 +5,42 @@ networks:
   backend:
 
 services:
-  eventcatalogapi:
+  event_catalog_api_SVC:
     build:
       context: .\EventCatalogApi
       dockerfile: Dockerfile
-    image: event/catalogapi
+    image: event_catalog_api_img
     environment:
-      DatabaseServer: mssqlserver
+      DatabaseServer: event_mssqlserver_SVC
       DatabaseName: EventLiteCatalogDb
       DatabaseUser: sa
       DatabasePassword: ProductApi(!)
       ExternalCatalogBaseUrl: http://localhost:5678
     ports:
       - "5678:80"
-    container_name: eventcatalogapi
+    container_name: event_catalog_api_CNTR
     networks:
       - backend
       - frontend
     depends_on:
-      - mssqlserver
+      - event_mssqlserver_SVC
 
-  mssqlserver:
+  event_mssqlserver_SVC:
     image: "microsoft/mssql-server-linux:latest"
     environment:
       ACCEPT_EULA: Y
       SA_PASSWORD: ProductApi(!)
     ports:
       - "1440:1433"
-    container_name: eventsqlserver
+    container_name: event_mssqlserver_CNTR
     networks:
       - backend
 
-  tokenserver:
+  event_token_server_SVC:
     build:
       context: .\TokenServiceApi
       dockerfile: Dockerfile
-    image: event/tokenapi
+    image: event_token_server_img
     logging:
       driver: "json-file"
       options:
@@ -51,28 +51,28 @@ services:
       MvcClient: http://localhost:1337
     ports:
       - "6789:80"
-    container_name: tokenserviceapi
+    container_name: event_token_server_CNTR
     networks:
       - backend
       - frontend
     depends_on:
-      - mssqlserver
+      - event_mssqlserver_SVC
 
 
-  webmvc:
+  event_webmvc_SVC:
     build:
       context: .\WebMVC
       dockerfile: Dockerfile
-    image: event/webmvc
+    image: event_webmvc_img
     environment:
-      EventCatalogApiUrl: http://eventcatalogapi
+      EventCatalogApiUrl: http://event_catalog_api_SVC
       IdentityUrl: http://169.254.139.65:6789
       CallBackUrl: http://localhost:1337
       ASPNETCORE_ENVIRONMENT: Development
     ports:
      - "1337:80"
-    container_name: eventwebmvc
+    container_name: event_webmvc_CNTR
     networks:
       - frontend
     depends_on:
-      - eventcatalogapi
+      - event_catalog_api_SVC
