@@ -107,14 +107,18 @@ namespace WebMVC
 
                 app.UseRouting();
 
-                app.UseAuthorization();
-
 
                 // For TokenService
                 app.UseHttpsRedirection();
                 app.UseAuthentication();
                 app.UseCookiePolicy();
 
+
+            // app.UseAuthentication(); MUST BE BEFORE app.UseAuthorization();
+            // Else, you will get into a nasty redirect loop
+            // https://www.scottbrady91.com/OpenID-Connect/Help-Im-Stuck-in-a-Redirect-Loop#comment-4633319851
+
+                app.UseAuthorization();
 
                 app.UseEndpoints(endpoints =>
                 {
