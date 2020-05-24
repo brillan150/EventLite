@@ -3,20 +3,27 @@
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-buster-slim AS base
 WORKDIR /app
 EXPOSE 80
-EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 WORKDIR /src
-COPY ["EventCartApi/EventCartApi.csproj", "EventCartApi/"]
-RUN dotnet restore "EventCartApi/EventCartApi.csproj"
+
 COPY . .
-WORKDIR "/src/EventCartApi"
-RUN dotnet build "EventCartApi.csproj" -c Release -o /app/build
+RUN dotnet restore EventCartApi.csproj
+RUN dotnet build EventCartApi.csproj -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "EventCartApi.csproj" -c Release -o /app/publish
+RUN dotnet publish EventCartApi.csproj -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "EventCartApi.dll"]
+
+
+#copypasta from event catalog api project
+#only need to rename the references to csproj files and dll file
+#then done
+
+#now need to add identity into mix
+#cart requires you to be authenticated
+#to startup

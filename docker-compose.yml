@@ -25,6 +25,26 @@ services:
     depends_on:
       - event_mssqlserver_SVC
 
+
+      
+  event_cart_api_SVC:
+    build:
+      context: .\EventCartApi
+      dockerfile: Dockerfile
+    image: event_cart_api_img
+    environment:
+      IdentityUrl: http://169.254.139.65:6789
+      ConnectionString: event_basket_data_SVC
+    ports:
+      - "8910:80"
+    container_name: event_cart_api_CNTR
+    networks:
+      - backend
+      - frontend
+    depends_on:
+      - event_basket_data_SVC
+      - event_token_server_SVC
+
   event_mssqlserver_SVC:
     image: "microsoft/mssql-server-linux:latest"
     environment:
@@ -76,3 +96,11 @@ services:
       - frontend
     depends_on:
       - event_catalog_api_SVC
+
+  event_basket_data_SVC:
+    image: redis
+    container_name: event_basket_data_CNTR
+    ports:
+      - "5704:6379"
+    networks:
+      - backend

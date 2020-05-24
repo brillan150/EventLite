@@ -47,6 +47,21 @@ namespace EventLite
             services.AddDbContext<CatalogContext>(builder =>
                 builder.UseSqlServer(connectionString));
 
+
+            // Added while walking through the cart api class
+            services.AddSwaggerGen(options =>
+            {
+                //options.DescribeAllEnumsAsStrings();
+                options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+                {
+                    Title = "EventLite - Event Catalog API",
+                    Version = "v1",
+                    Description = "Event catalog microservice"
+                });
+                options.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
+
+            });
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -60,6 +75,14 @@ namespace EventLite
             app.UseRouting();
 
             app.UseAuthorization();
+
+
+            // Second change to Startup.cs for Swagger
+            app.UseSwagger()
+                .UseSwaggerUI(e =>
+                {
+                    e.SwaggerEndpoint("/swagger/v1/swagger.json", "EventCatalogAPI V1");
+                });
 
             app.UseEndpoints(endpoints =>
             {
