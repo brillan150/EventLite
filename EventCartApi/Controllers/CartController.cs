@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using EventCartApi.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventCartApi.Controllers
@@ -15,6 +16,11 @@ namespace EventCartApi.Controllers
 
     [Route("api/[controller]")]
     [ApiController]
+
+    // All methods on this controller require authorization
+    // Can be applied at the class level
+    // Protect the Cart Api microservice
+    [Authorize]
     public class CartController : ControllerBase
     {
         // set up dependency injection

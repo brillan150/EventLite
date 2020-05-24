@@ -3,8 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace EventCartApi.Models
+namespace WebMVC.Models.CartModels
 {
+
+    // After finished with CustomHttpClient
+
+    // Time to bring over models from CartApi
+    // exact copy
+
     public class CartItem
     {
         public string Id { get; set; }

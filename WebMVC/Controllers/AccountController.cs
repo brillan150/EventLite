@@ -63,7 +63,7 @@ namespace WebMVC.Controllers
 
             ////// "Catalog" because UrlHelper doesn't support nameof() for controllers
             ////// https://github.com/aspnet/Mvc/issues/5853
-            var homeUrl = Url.Action(nameof(RandomEventsController.Index), "RandomEevents");
+            var homeUrl = Url.Action(nameof(RandomEventsController.Index), "RandomEvents");
             return new SignOutResult(OpenIdConnectDefaults.AuthenticationScheme,
                 new AuthenticationProperties { RedirectUri = homeUrl });
         }

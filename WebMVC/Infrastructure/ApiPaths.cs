@@ -185,9 +185,47 @@ namespace WebMVC.Infrastructure
 
         }
 
-        public static class Cart
+
+
+
+
+        //        Next: 
+
+        //Components of webmvc project
+
+        //need to touch all these places
+
+        //views
+        //viewmodels
+        //viewcomponents
+
+        //controller
+        //services
+        //apipaths
+        //customhttpclient
+
+
+
+        //start with apipaths(start from the back)
+
+
+            // Then to CustomHttpClient
+        public static class Basket
         {
-        
+            public static string GetBasket(string baseUri, string basketId)
+            {
+                return $"{baseUri}/{basketId}";
+            }
+
+            public static string UpdateBasket(string baseUri)
+            {
+                return baseUri;
+            }
+
+            public static string CleanBasket(string baseUri, string basketId)
+            {
+                return $"{baseUri}/{basketId}";
+            }
         }
 
         public static class Order

@@ -1,8 +1,15 @@
 ﻿@using Microsoft.AspNetCore.Identity
+@using WebMVC.Services
+@using WebMVC.Models
+
+
+<!-- Added while integrating CartApi into WebMVC -->
+@inject IIdentityService<ApplicationUser> UserManager
 
 
 
- @if (User.FindFirst(x => x.Type == "preferred_username") != null) {
+@if (User.FindFirst(x => x.Type == "preferred_username") != null)
+{
 
     <section class="col-lg-4 col-md-5 col-xs-12">
         <div class="esh-identity">
@@ -16,9 +23,9 @@
 
                 <section class="esh-identity-drop">
 
-                   
 
-                   
+
+
 
                     <a class="esh-identity-item"
                        href="javascript:document.getElementById('logoutForm').submit()">
@@ -32,7 +39,13 @@
     </section>
 
     <section class="col-lg-1 col-xs-12">
-     
+        <!-- Added while integrating CartApi into WebMVC -->
+        <!-- This is where you're invoking the component -->
+        <!-- Code is in ViewComponents\CartVC.cs -->
+        <!-- cshtml that goes to the code in Views\Shared\Components\CartVC\Default.cshtml -->
+        @await Component.InvokeAsync("CartVC", new { user = UserManager.Get(User) })
+        <!--  Invoke the "CartVC" component. That component needs this parameter... public async Task<IViewComponentResult> CartVC.InvokeAsync(ApplicationUser user)-->
+        <!-- User represents the current logged-in user (it's a ClaimsPrincipal)...we pass that to the IIdentityService.Get method, and that gives us the ApplicationUser that we need to pass to CartVC's InvokeAsync method -->
     </section>
 
 }

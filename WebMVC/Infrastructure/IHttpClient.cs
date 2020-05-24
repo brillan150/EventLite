@@ -16,12 +16,28 @@ namespace WebMVC.Infrastructure
         // Note that you don't put async on the declaration of an
         // interface, only on the definition of a method
 
-        public Task<string> HttpGetStringAsync(string uri, string authToken = null, string authMethod = "Bearer");
 
-        public Task<HttpResponseMessage> HttpPostAsync<T>(string uri, T item, string authToken = null, string authMethod = "Bearer");
+        public Task<string> HttpGetStringAsync(
+            string uri,
+            string authorizationToken = null,
+            string authorizationMethod = "Bearer");
 
-        public Task<HttpResponseMessage> HttpPutAsync<T>(string uri, T item, string authToken = null, string authMethod = "Bearer");
 
-        public Task<HttpResponseMessage> HttpDeleteAsync(string uri, string authToken = null, string authMethod = "Bearer");
+        Task<HttpResponseMessage> HttpPostAsync<T>(
+            string uri,
+            T item,
+            string authorizationToken = null,
+            string authorizationMethod = "Bearer");
+
+        Task<HttpResponseMessage> HttpPutAsync<T>(
+            string uri,
+            T item,
+            string authorizationToken = null,
+            string authorizationMethod = "Bearer");
+
+        Task<HttpResponseMessage> HttpDeleteAsync(
+            string uri,
+            string authorizationToken = null,
+            string authorizationMethod = "Bearer");
     }
 }

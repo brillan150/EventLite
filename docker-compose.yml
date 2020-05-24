@@ -88,6 +88,7 @@ services:
       EventCatalogApiUrl: http://event_catalog_api_SVC
       IdentityUrl: http://169.254.139.65:6789
       CallBackUrl: http://localhost:1337
+      CartUrl: http://event_cart_api_SVC
       ASPNETCORE_ENVIRONMENT: Development
     ports:
      - "1337:80"
@@ -96,6 +97,8 @@ services:
       - frontend
     depends_on:
       - event_catalog_api_SVC
+      - event_cart_api_SVC
+      - event_token_server_SVC
 
   event_basket_data_SVC:
     image: redis

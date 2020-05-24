@@ -16,6 +16,7 @@ using WebMVC.Services;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Logging;
+using WebMVC.Models;
 
 namespace WebMVC
 {
@@ -50,6 +51,18 @@ namespace WebMVC
 
             services.AddTransient<IEventCatalogApiService, EventCatalogApiService>();
 
+            // EventCartApi Integration
+            // This is the service that allows you to get the token from the httpcontext browser section
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            // Service for logging in and logging out...
+            // But I didn't have these at the point in the vid when Kal showed adding these
+            // lines to Startup: https://youtu.be/3NjVcWju7EE?list=PLdbymrfiqF-wmh3VsbxysBsu2O9w6Z3Ks&t=194
+            services.AddTransient<IIdentityService<ApplicationUser>, IdentityService>();
+            // DI for cart service
+            services.AddTransient<IEventCartApiService, EventCartApiService>();
+
+
+
 
             // More Token
             var identityUrl = Configuration.GetValue<string>("IdentityUrl");
@@ -75,6 +88,16 @@ namespace WebMVC
                 options.Scope.Add("openid");
                 options.Scope.Add("profile");
                 options.Scope.Add("offline_access");
+
+                // Added for CartApi integration
+                // Extend your scope to add basket
+                options.Scope.Add("basket");
+                // Those are all of the changes in Startup for integrating CartApi
+
+                // Next are views, the UI
+                // Created Cart Component and CartList Component
+
+
                 options.TokenValidationParameters = new TokenValidationParameters()
                 {
 

@@ -1,0 +1,27 @@
+﻿@using WebMVC.Services
+@using WebMVC.ViewModels
+
+@*@model  WebMvc.Models.CartModels.Cart*@
+@inject IIdentityService<ApplicationUser> identityService
+
+@{
+    ViewData["Title"] = "My Cart";
+}
+
+
+<!-- The Update button in Views\Shared\Components\CartListVC\Default.cshtml -->
+<!-- is embedded by the Component.InvokeAsync method below -->
+<form method="post" id="cartForm">
+    <!-- Where is this form posting to? Back to this same page. -->
+    <!-- When you don't see an action or a controller, it will post to the same page, the same action -->
+    <!-- Right now we are on the Index page View for the CartController -->
+    <!-- This form will post back to the CartController, specifically to the Index action -->
+    <!-- (Now go take a look back at the Index method on CartController) -->
+    <div class="esh-basket">
+        @Html.Partial("_Header", new List<Header>() {
+            new Header() { Controller = "RandomEvents", Text = "Back to catalog" } })
+        <!-- This is the back link for the user from the Cart page -->
+
+        @await Component.InvokeAsync("CartListVC", new { user = identityService.Get(User) })
+    </div>
+</form>

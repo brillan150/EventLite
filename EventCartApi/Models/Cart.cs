@@ -10,6 +10,12 @@ namespace EventCartApi.Models
         public string BuyerId { get; set; }
         public List<CartItem> Items { get; set; }
 
+        // Aha! Thank you Richa
+        // Looks like Kal probably had the 500 error when testing her code
+        // after she first introduced the Cart model class
+        public Cart()
+        { }
+
         public Cart(string cartId)
         {
             BuyerId = cartId;
