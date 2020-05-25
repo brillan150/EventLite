@@ -38,9 +38,14 @@ namespace WebMVC.Controllers
             // Noting that this method's first parameter is a Dictionary<string, int> called quantities
             // 
 
+
+            // Arrived here again from the cshtml view file for this method
+            // while integrating the OrderApi microservice...it's a popular place to be
+
             // Checking to see if the action is checkout
-            if (action == "[ Checkout ]")
+            if (action == "[ Checkout ]") // action is the text of the button
             {
+                // Redirect the user to the OrderController, specifically to the Create action...go there now
                 return RedirectToAction("Create", "Order");
             }
 

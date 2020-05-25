@@ -22,6 +22,7 @@
             new Header() { Controller = "RandomEvents", Text = "Back to catalog" } })
         <!-- This is the back link for the user from the Cart page -->
 
+        <!-- CartListVC view component. Go to CartListVC\Index.cshtml to see the cshtml that goes to the CartListVC.cs code-based component -->
         @await Component.InvokeAsync("CartListVC", new { user = identityService.Get(User) })
     </div>
 </form>

@@ -33,7 +33,7 @@ services:
       dockerfile: Dockerfile
     image: event_cart_api_img
     environment:
-      IdentityUrl: http://169.254.139.65:6789
+      IdentityUrl: http://192.168.192.49:6789
       ConnectionString: event_basket_data_SVC
     ports:
       - "8910:80"
@@ -44,6 +44,37 @@ services:
     depends_on:
       - event_basket_data_SVC
       - event_token_server_SVC
+      - event_rabbitmq_msg_SVC
+
+  event_order_api_SVC:
+    build:
+      context: .\EventOrderApi
+      dockerfile: Dockerfile
+    image: event_order_api_img
+    logging: # turn on logging
+      driver: "json-file" #json is common...could use event log but win only (not on our linux containers)
+      options:
+        max-size: "200k"
+        max-file: "10"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      IdentityUrl: http://192.168.192.49:6789
+      DatabaseServer: event_mssqlserver_SVC
+      DatabaseName: EventLiteOrdersDb
+      DatabaseUser: sa
+      DatabasePassword: ProductApi(!)
+    ports:
+      - "8999:80"
+    container_name: event_order_api_CNTR
+    networks:
+      - backend
+      - frontend
+    depends_on:
+      - event_mssqlserver_SVC
+      - event_token_server_SVC
+      - event_rabbitmq_msg_SVC #bunny dependency
+
+
 
   event_mssqlserver_SVC:
     image: "microsoft/mssql-server-linux:latest"
@@ -86,9 +117,12 @@ services:
     image: event_webmvc_img
     environment:
       EventCatalogApiUrl: http://event_catalog_api_SVC
-      IdentityUrl: http://169.254.139.65:6789
+      IdentityUrl: http://192.168.192.49:6789
       CallBackUrl: http://localhost:1337
       CartUrl: http://event_cart_api_SVC
+      OrderUrl: http://event_order_api_SVC
+      StripePublicKey: pk_test_3cOXtVRvsfqBNqFZAwDJYyQ800F3cp9IV3 # PASTED FROM STRIPE Api keys page
+      StripePrivateKey: sk_test_opUkxPdEdTbc2FHdcAK6zOUH00CTFhHlGY # PASTED FROM STRIPE Api keys page
       ASPNETCORE_ENVIRONMENT: Development
     ports:
      - "1337:80"
@@ -99,6 +133,7 @@ services:
       - event_catalog_api_SVC
       - event_cart_api_SVC
       - event_token_server_SVC
+      - event_order_api_SVC
 
   event_basket_data_SVC:
     image: redis
@@ -107,3 +142,16 @@ services:
       - "5704:6379"
     networks:
       - backend
+
+  event_rabbitmq_msg_SVC:
+    image: rabbitmq:3-management
+    container_name: rabbitmq_msg_CNTR
+    hostname: myrabbitmq
+    ports: # same ports ok to use...but that didn't work: Cannot start service event_rabbitmq_msg_SVC: driver failed programming external connectivity on endpoint rabbitmq_msg_CNTR ...... failed: port is already allocated If the error persists, try restarting Docker Desktop.	
+      - "19672:15672"
+      - "5972:5672"
+      - "5971:5671" # so I changed them a bit anyway
+    volumes: # copies to local volume, can try removing this if you want
+      - ~/rabbitmq:/var/lib/rabbitmq/mnesia    # where can download the image to drop folder on the container like C:\
+    networks:
+      - backend 

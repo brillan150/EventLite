@@ -13,6 +13,7 @@ using WebMVC.Models;
 using WebMVC.Models.CartModels;
 using WebMVC.Models.Common;
 using WebMVC.Models.FilterModels;
+using WebMVC.Models.OrderModels;
 
 namespace WebMVC.Services
 {
@@ -216,6 +217,29 @@ namespace WebMVC.Services
         //    return order;
         //}
 
+
+
+        public Order MapCartToOrder(Cart cart)
+        {
+            var order = new Order();
+            order.OrderTotal = 0;
+
+            cart.Items.ForEach(x =>
+            {
+                order.OrderItems.Add(new OrderItem()
+                {
+                    ProductId = int.Parse(x.EventId),
+
+                    PictureUrl = x.PictureUrl,
+                    ProductName = x.EventTitle,
+                    Units = x.Quantity,
+                    UnitPrice = x.UnitPrice
+                });
+                order.OrderTotal += (x.Quantity * x.UnitPrice);
+            });
+
+            return order;
+        }
 
         // Gets the user's cart
         // Sets the quantities on that cart and retuns the cart item

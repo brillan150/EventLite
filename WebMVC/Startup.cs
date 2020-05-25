@@ -61,6 +61,8 @@ namespace WebMVC
             // DI for cart service
             services.AddTransient<IEventCartApiService, EventCartApiService>();
 
+            // Nearly missed this part of OrderApi ms integration
+            services.AddTransient<IOrderService, OrderService>();
 
 
 
@@ -93,6 +95,9 @@ namespace WebMVC
                 // Extend your scope to add basket
                 options.Scope.Add("basket");
                 // Those are all of the changes in Startup for integrating CartApi
+
+                // This didn't come up either in Kal's walkthrough of Order integration
+                options.Scope.Add("order");
 
                 // Next are views, the UI
                 // Created Cart Component and CartList Component

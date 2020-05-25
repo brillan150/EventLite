@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
 using EventCartApi.Models;
@@ -29,7 +30,12 @@ namespace EventCartApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers()
+                                        // ** Need this for Cart and Order
+                                        // In order for POST to work
+                                        .AddNewtonsoftJson();
+                                        // Also need to install nuget package:
+                                        // Microsoft.AspNetCore.Mvc.NewtonsoftJson
 
             // set up di for redis
             services.AddTransient<ICartRepository, RedisCartRepository>();
@@ -245,6 +251,14 @@ namespace EventCartApi
         }
         private void ConfigureAuthService(IServiceCollection services)
         {
+            // While Kal was covering Order, she copypasta-ed this ConfigureAuthService
+            // method from here in Cart over to Order
+            // I noticed that she had added this line back to Cart as well,
+            // So here we are:
+            // Kal: "prevent from mapping "sub" claim to nameidentifier."
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+
+
             // where is id server located
             // read our config
             var identityUrl = Configuration["IdentityUrl"];
@@ -281,6 +295,18 @@ namespace EventCartApi
                 // must be on the list
 
                 // "I am basket" I can ask for a token from the tokenapiserver
+
+                // Can look back at tokenservice's Config.cs to see where these Audience names are used:
+                //    public static IEnumerable<ApiResource> GetApiResources()
+                //    {
+                //        return new List<ApiResource>
+                //{
+                //     new ApiResource("basket", "Shopping Cart Api"),
+                //     new ApiResource("order", "Ordering Api"),
+                //};
+                //    }
+
+
             });
         }
 
