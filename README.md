@@ -1,4 +1,7 @@
 # EventLite
+
+YouTube video for third submission (Assignment 3c)
+https://www.youtube.com/watch?v=-ueKPzW3fNM
  
 YouTube video for second submission (Assignment 3b)
 https://www.youtube.com/watch?v=6Bex9JK7_Eo
